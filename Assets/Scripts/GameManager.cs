@@ -3,10 +3,8 @@ using System.IO;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
-using UTool.TabSystem;
 
 [DefaultExecutionOrder(-100)]
-[HasTabField]
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -19,7 +17,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text livesText;
     [SerializeField] private TMP_Text highScoreText;
     public int Round=0;
-    [TabField]
     public float gameOverTimeout = 3f;
 
     [Header("Audio")]
