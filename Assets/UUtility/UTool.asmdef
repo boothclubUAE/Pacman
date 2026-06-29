@@ -1,0 +1,21 @@
+{
+    "name": "UTool",
+    "rootNamespace": "",
+    "references": [
+        "GUID:905c050716c289544a048614bd788152",
+        "GUID:696a0953692949b40bec8730e64e1fdd",
+        "GUID:18537184b62b4d841b3f068da60e8cff",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:1fbc052e3ea2ff24b8874f1cedb59b6c",
+        "GUID:735c8f008d0ad4caa9cdc4306f1c3042"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

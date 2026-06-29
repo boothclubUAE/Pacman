@@ -1,0 +1,51 @@
+UTool License Agreement (UTLA)
+
+This License applies to the software tool known as UTool, including its core class UUtility and all additional tools or utilities it contains. By using, copying, or distributing the Software, you agree to the terms of this License.
+
+1. Ownership and Copyright
+1.1. The Software, including all versions, components, and derivatives based on the class UUtility and any other tools included under the UTool package, is the exclusive property of Aswin Mani.
+1.2. All rights, including but not limited to copyrights, remain with the Owner.
+
+2. Usage Permissions
+2.1. Allowed Usage:
+   - You may use the Software solely for personal, private, or organizational projects owned or managed by you.
+   - The Software may be used across multiple projects only if it remains private and under the control of the licensee.
+
+2.2. Prohibited Actions:
+   - Redistribution: You may not distribute, share, sell, or sublicense the Software or any part thereof, in any form, to any third party.
+   - Modification: You may not modify, reverse engineer, decompile, disassemble, or create derivative works of the Software unless explicitly authorized in writing by the Owner.
+   - Recreation or Mimicking: Users are prohibited from re-creating, reverse engineering, or otherwise duplicating the functionality, structure, or architecture of the Software, including UUtility and any tools or utilities under the UTool package.
+   - Commercial Use: The Software or its derivatives may not be monetized directly or indirectly without prior written consent from the Owner.
+
+3. Applicability
+3.1. This License applies to all existing, past, and future versions of the Software containing or depending on the core class UUtility.
+3.2. The License applies regardless of the distribution method, including but not limited to private repositories, manual installations, or any other form of non-centralized distribution.
+3.3. This License is inherently tied to the Software due to its version-independent nature and absence of automatic update mechanisms.
+
+4. Third-Party Plugins
+4.1. The Plugins folder within this package contains third-party software components that are included solely for ease of use.
+4.2. Each plugin is subject to its respective license, and the inclusion of these plugins does not imply any modification or ownership by the author of this Software.
+4.3. Users are required to review and comply with the licenses of the third-party components included. These licenses are provided in the ThirdPartyLicenses directory or the Plugins folder.
+
+5. Transfer and Termination
+5.1. The License is non-transferable.
+5.2. Any breach of this License will result in the immediate termination of your rights to use the Software. Upon termination, you must delete all copies of the Software in your possession.
+
+6. Liability and Warranty
+6.1. The Software is provided "as-is," without warranties of any kind, express or implied, including but not limited to the implied warranties of merchantability or fitness for a particular purpose.
+6.2. The Owner shall not be held liable for any damages resulting from the use, inability to use, or unauthorized use of the Software.
+
+7. Trademarks
+7.1. The names UTool, UUtility, and all related branding elements are trademarks of the Owner.
+7.2. Unauthorized use of these names or trademarks is prohibited.
+
+8. Jurisdiction
+8.1. This License shall be governed by the laws of Singapore, without regard to its conflict of laws principles.
+8.2. Any disputes arising from this License shall be resolved under the exclusive jurisdiction of the courts of Singapore.
+
+9. Miscellaneous
+9.1. The Owner reserves the right to update or amend this License at any time. Updates will apply to all current and future versions of the Software.
+9.2. Any disputes arising from this License shall be governed by the laws of Singapore.
+
+Contact
+For inquiries or permissions, contact aswinmani2001@gmail.com.

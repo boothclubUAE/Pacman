@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 086d352b8216e9a4bbfc0e5502fcb5e5, type: 3}
+  m_Name: DefaultFontLookUp
+  m_EditorClassIdentifier: 
+  primary: {fileID: 11400000, guid: 69d181ba1a2d40c4982ace352d74ee14, type: 2}
+  secondary: {fileID: 11400000, guid: 3fbde2e562e333d488bc46986fc6f4f1, type: 2}
+  tertiary: {fileID: 11400000, guid: 743ff6528cc67d24bbc54d2969f0af93, type: 2}
