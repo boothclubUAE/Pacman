@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: b2d17c6299332104ba88512062ab3fa2
+guid: 335028981afe25c48b791d1d02b2b6f8
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1713409347818053904
-    second: Valetax Icon-1 (1)_0
-  - first:
-      213: -3321166069264891926
-    second: Valetax Icon-1 (1)_1
+      213: -5899927303015767666
+    second: Ghost_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -103,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Valetax Icon-1 (1)_0
+      name: Ghost_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1053
-        height: 615
+        x: 3
+        y: 3
+        width: 121
+        height: 124
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -118,30 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 011678b49b047c710800000000000000
-      internalID: 1713409347818053904
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Valetax Icon-1 (1)_1
-      rect:
-        serializedVersion: 2
-        x: 803
-        y: 366
-        width: 309
-        height: 249
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: aefb2696e09d8e1d0800000000000000
-      internalID: -3321166069264891926
+      spriteID: e81ed17806f3f1ea0800000000000000
+      internalID: -5899927303015767666
       vertices: []
       indices: 
       edges: []
@@ -160,8 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Valetax Icon-1 (1)_0: 1713409347818053904
-      Valetax Icon-1 (1)_1: -3321166069264891926
+      Ghost_0: -5899927303015767666
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
