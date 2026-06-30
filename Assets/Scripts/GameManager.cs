@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.IO;
 using DG.Tweening;
@@ -5,6 +6,7 @@ using TMPro;
 using UnityEngine;
 
 [DefaultExecutionOrder(-100)]
+[HasTabField]
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -17,6 +19,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text livesText;
     [SerializeField] private TMP_Text highScoreText;
     public int Round=0;
+    [TabField]
     public float gameOverTimeout = 3f;
 
     [Header("Audio")]
@@ -30,7 +33,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioClip wakaSound2; // Second "waka" sound (ka)
 
     public int score { get; private set; } = 0;
-    public int lives { get; private set; } = 3;
+    [TabField]
+    public int lives = 3;
     private int highScore = 0;
 
     private int ghostMultiplier = 1;
@@ -78,6 +82,12 @@ public class GameManager : MonoBehaviour
         SetScore(0);
         SetLives(3);
         IdleState();
+        SerialManager.Instance.OnMessageReceived.AddListener(OnSerialMessageReceived);
+    }
+
+    private void OnSerialMessageReceived(string message)
+    {
+        message
     }
 
     private void Update()
@@ -99,6 +109,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    [TabButton]
     private void ClearHighScore()
     {
         highScore = 0;
