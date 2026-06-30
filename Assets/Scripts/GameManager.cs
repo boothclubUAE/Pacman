@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Drawing.Drawing2D;
 using System.IO;
 using DG.Tweening;
 using TMPro;
@@ -234,7 +235,7 @@ public class GameManager : MonoBehaviour
         {
             audioSource.PlayOneShot(gameOverClip);
         }
-
+        Registration.Instance.OnEnd();
         ShowGameOverScreen();
     }
 

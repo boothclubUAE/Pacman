@@ -6,9 +6,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ClawMachineGameFlow : MonoBehaviour
+public class Registration : MonoBehaviour
 {
-    public static ClawMachineGameFlow Instance;
+    public static Registration Instance;
 
     private enum PageState
     {
@@ -59,7 +59,6 @@ public class ClawMachineGameFlow : MonoBehaviour
     private TMP_InputField activeInput;
     private bool waitingForYellowButton;
     private KeyboardPage currentKeyboardPage = KeyboardPage.Lowercase;
-    private Tween gameTimeoutTween;
 
     private bool IsSingleKeyboardLayout =>
         lowercasePage == null && uppercasePage == null && numbersPage == null;
@@ -111,16 +110,14 @@ public class ClawMachineGameFlow : MonoBehaviour
 
     public void OnEnd()
     {
-        if (waitingForYellowButton)
-        {
-            waitingForYellowButton = false;
+        if (!waitingForYellowButton)
+            return;
 
-            gameTimeoutTween?.Kill();
+        waitingForYellowButton = false;
 
-            ShowPage(PageState.Page4GameOver);
+        ShowPage(PageState.Page4GameOver);
 
-            DOVirtual.DelayedCall(5, ResetGame);
-        }
+        DOVirtual.DelayedCall(5, ResetGame);
     }
 
     private void ResetGame()
@@ -186,37 +183,10 @@ public class ClawMachineGameFlow : MonoBehaviour
     private void OnPlayPressed()
     {
         if (currentState != PageState.Page3)
-        {
             return;
-        }
-
-        SendStartToSerial();
 
         waitingForYellowButton = true;
         playButton.interactable = false;
-
-        gameTimeoutTween?.Kill();
-
-        gameTimeoutTween = DOVirtual.DelayedCall(
-            SerialManager.Instance.gameTime,
-            () =>
-            {
-                if (waitingForYellowButton)
-                {
-                    Debug.Log("Game Timeout Reached");
-                    SendStopToSerial();
-                    OnEnd();
-                }
-            });
-    }
-
-    private void SendStartToSerial()
-    {
-        SerialManager.Instance.SendStartToSerial();
-    }
-    private void SendStopToSerial()
-    {
-        SerialManager.Instance.SendStopToSerial();
     }
 
     private void SetActiveInput(TMP_InputField input)
