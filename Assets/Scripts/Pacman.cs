@@ -6,11 +6,14 @@ public class Pacman : MonoBehaviour
 {
     [SerializeField]
     private AnimatedSprite deathSequence;
+
     private SpriteRenderer spriteRenderer;
     private CircleCollider2D circleCollider;
     internal Movement movement;
 
-    private Vector2 nextDirection = Vector2.zero;
+    // Input buffers
+    private Vector2 keyboardDirection = Vector2.zero;
+    private Vector2 externalDirection = Vector2.zero;
 
     private readonly Dictionary<KeyCode, Vector2> keyToDirection = new()
     {
@@ -30,23 +33,50 @@ public class Pacman : MonoBehaviour
 
     private void Update()
     {
-        // Step 1: Check for input and queue it as nextDirection
+        HandleKeyboardInput();
+        HandleMovement();
+        HandleRotation();
+    }
+
+    // ---------------- INPUT ----------------
+    private void HandleKeyboardInput()
+    {
         foreach (var kvp in keyToDirection)
         {
             if (Input.GetKeyDown(kvp.Key))
             {
-                nextDirection = kvp.Value;
+                keyboardDirection = kvp.Value;
             }
         }
+    }
 
-        // Step 2: Try to apply the queued direction if valid
-        if (nextDirection != Vector2.zero && !movement.Occupied(nextDirection))
+    // ---------------- MOVEMENT ----------------
+    private void HandleMovement()
+    {
+        Vector2 chosenDirection = Vector2.zero;
+
+        // external has priority
+        if (externalDirection != Vector2.zero)
         {
-            movement.SetDirection(nextDirection, forced: true);
-            nextDirection = Vector2.zero;
+            chosenDirection = externalDirection;
+        }
+        else if (keyboardDirection != Vector2.zero)
+        {
+            chosenDirection = keyboardDirection;
         }
 
-        // Step 3: Rotate Pacman sprite
+        if (chosenDirection != Vector2.zero && !movement.Occupied(chosenDirection))
+        {
+            movement.SetDirection(chosenDirection, forced: true);
+
+            keyboardDirection = Vector2.zero;
+            externalDirection = Vector2.zero;
+        }
+    }
+
+    // ---------------- ROTATION ----------------
+    private void HandleRotation()
+    {
         if (movement.direction != Vector2.zero)
         {
             float angle = Mathf.Atan2(movement.direction.y, movement.direction.x);
@@ -54,6 +84,18 @@ public class Pacman : MonoBehaviour
         }
     }
 
+    // ---------------- EXTERNAL CONTROL ----------------
+    public void SetExternalDirection(Vector2 direction)
+    {
+        externalDirection = direction;
+    }
+
+    public void ClearExternalDirection()
+    {
+        externalDirection = Vector2.zero;
+    }
+
+    // ---------------- STATES ----------------
     public void Idle()
     {
         enabled = false;
@@ -73,7 +115,10 @@ public class Pacman : MonoBehaviour
         deathSequence.enabled = false;
         movement.canMove = true;
         movement.ResetState();
-        nextDirection = Vector2.zero;
+
+        keyboardDirection = Vector2.zero;
+        externalDirection = Vector2.zero;
+
         gameObject.SetActive(true);
     }
 

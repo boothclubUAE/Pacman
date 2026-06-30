@@ -15,11 +15,14 @@ public class SerialManager : MonoBehaviour
     public string portName = "COM5";
     [TabField]
     public int baudRate = 115200;
+    [TabField]
+    public float BufferTimeout = 1f;
 
     private SerialPort port;
     private Thread readThread;
     private bool running;
-
+    private float bufferTimer;
+    private bool clearingBuffer = false;
     private readonly ConcurrentQueue<string> messageQueue = new ConcurrentQueue<string>();
 
     public UnityEvent<string> OnMessageReceived;
@@ -43,6 +46,10 @@ public class SerialManager : MonoBehaviour
 
             Debug.Log($"Serial Opened: {portName} @ {baudRate}");
 
+            // Start buffer clearing phase
+            clearingBuffer = true;
+            bufferTimer = BufferTimeout;
+
             running = true;
 
             readThread = new Thread(ReadSerial);
@@ -58,8 +65,24 @@ public class SerialManager : MonoBehaviour
     {
         while (messageQueue.TryDequeue(out string message))
         {
+            if (clearingBuffer)
+                continue;
+
             Debug.Log("From Arduino: " + message);
             OnMessageReceived?.Invoke(message);
+        }
+
+        // handle buffer timeout countdown
+        if (clearingBuffer)
+        {
+            bufferTimer -= Time.deltaTime;
+
+            if (bufferTimer <= 0f)
+            {
+                clearingBuffer = false;
+                port?.DiscardInBuffer(); // final clean
+                Debug.Log("Serial buffer cleared, now listening.");
+            }
         }
     }
 
@@ -76,10 +99,17 @@ public class SerialManager : MonoBehaviour
         byte[] buffer = new byte[1024];
         int bufferCount = 0;
 
+
         while (running)
         {
             try
             {
+                if (clearingBuffer)
+                {
+                    port.DiscardInBuffer();
+                    bufferCount = 0;
+                    continue;
+                }
                 if (port != null && port.IsOpen && port.BytesToRead > 0)
                 {
                     int b = port.ReadByte();

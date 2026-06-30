@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text livesText;
     [SerializeField] private TMP_Text highScoreText;
-    public int Round=0;
+    public int Round = 0;
     [TabField]
     public float gameOverTimeout = 3f;
 
@@ -87,7 +87,16 @@ public class GameManager : MonoBehaviour
 
     private void OnSerialMessageReceived(string message)
     {
-        message
+        var direction = message switch
+        {
+            "UP" => Vector2.up,
+            "DOWN" => Vector2.down,
+            "LEFT" => Vector2.left,
+            "RIGHT" => Vector2.right,
+            _ => Vector2.zero
+        };
+        if (direction != Vector2.zero)
+            pacman.SetExternalDirection(direction);
     }
 
     private void Update()
@@ -147,7 +156,7 @@ public class GameManager : MonoBehaviour
             ghost.Idle();
             ghost.movement.ResetPosition();
             ghost.movement.canMove = false;
-            ghost.movement.speedMultiplier=1;
+            ghost.movement.speedMultiplier = 1;
         }
         pacman.Idle();
         pacman.movement.ResetPosition();
@@ -182,7 +191,7 @@ public class GameManager : MonoBehaviour
         SetScore(0);
         SetLives(3);
         IdleState();
-        Round=0;
+        Round = 0;
     }
 
     private void NewRound()
@@ -376,7 +385,7 @@ public class GameManager : MonoBehaviour
         if (!HasRemainingPellets())
         {
             pacman.gameObject.SetActive(false);
-            DOVirtual.DelayedCall(3,()=>
+            DOVirtual.DelayedCall(3, () =>
             {
                 NewRound();
                 Round++;
