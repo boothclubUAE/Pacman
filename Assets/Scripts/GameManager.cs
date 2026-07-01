@@ -139,16 +139,47 @@ public class GameManager : MonoBehaviour
         isGameStarted = true;
 
         gameOverText.enabled = true;
-        gameOverText.text = "READY!";
+        RectTransform textRect = gameOverText.GetComponent<RectTransform>();
+
         if (gameStartClip != null)
         {
             audioSource.PlayOneShot(gameStartClip);
         }
-        DOVirtual.DelayedCall(gameStartClip != null ? gameStartClip.length : 0f, () =>
+
+        Sequence countdownSequence = DOTween.Sequence();
+
+        // Helper function to animate the text changes dynamically
+        void AnimateCountdownStep(string value)
         {
+            countdownSequence.AppendCallback(() => {
+                gameOverText.text = value;
+
+                // Clean reset before running the next punch
+                textRect.DOKill();
+                textRect.localScale = Vector3.one;
+                textRect.localRotation = Quaternion.identity;
+
+                // Half power scale: punches up to x1.5 maximum instead of x2
+                textRect.DOPunchScale(Vector3.one * 0.5f, 0.4f, 4, 0.5f);
+
+                // Half power rotation: reduced max vibration angle to 10 degrees
+                textRect.DOShakeRotation(0.4f, new Vector3(0, 0, 10f), 8, 90);
+            });
+            countdownSequence.AppendInterval(1f);
+        }
+
+        // Build the dynamic visual sequence
+        AnimateCountdownStep("3");
+        AnimateCountdownStep("2");
+        AnimateCountdownStep("1");
+        AnimateCountdownStep("GO!");
+
+        // Wrap up and start Pacman/Ghosts mechanics
+        countdownSequence.OnComplete(() =>
+        {
+            textRect.localScale = Vector3.one;
+            textRect.localRotation = Quaternion.identity;
             gameOverText.enabled = false;
-        }).OnComplete(() =>
-        {
             NewRound();
         });
     }
