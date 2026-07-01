@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
@@ -7,8 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using DG.Tweening;
 
+[DefaultExecutionOrder(-500)]
 public class ControlPanel : MonoBehaviour
 {
+    [SerializeField] private GameObject controlPanel;
+
+    private bool panelOpen = false;
     public Transform modulesContent;
     public Transform detailsContent;
 
@@ -24,166 +28,172 @@ public class ControlPanel : MonoBehaviour
     public Button reset;
 
     List<object> objects = new();
-    Dictionary<object, object> defaults = new();
-
     object current;
 
-    string path => Application.persistentDataPath + "/settings.json";
+    string path => Application.dataPath + "/settings.txt";
 
     public RectTransform panel;
     public float showX = 10f;
     public float duration = 0.3f;
 
     bool isOpen;
-    Coroutine holdRoutine;
+
     public Button invisibleButton;
     public float holdTime = 2f;
+
     float holdTimer;
     bool holding;
 
-    [Serializable]
-    public class SaveData
+    public Button DebugButton;
+    public GameObject InGameDebugMenu;
+
+    private void Awake()
     {
-        public List<string> values = new();
+        foreach (var display in Display.displays)
+            display.Activate();
     }
     void Start()
     {
-        invisibleButton.onClick.AddListener(() => { }); // dummy to ensure it's active
+        DebugButton.onClick.AddListener(() =>
+            InGameDebugMenu.SetActive(!InGameDebugMenu.activeSelf));
 
-        var eventTrigger = invisibleButton.gameObject.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+        SetupHoldButton();
 
-        var pointerDown = new UnityEngine.EventSystems.EventTrigger.Entry
-        {
-            eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown
-        };
-
-        pointerDown.callback.AddListener((e) =>
-        {
-            holding = true;
-            holdTimer = 0f;
-        });
-
-        var pointerUp = new UnityEngine.EventSystems.EventTrigger.Entry
-        {
-            eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp
-        };
-
-        pointerUp.callback.AddListener((e) =>
-        {
-            holding = false;
-        });
-
-        eventTrigger.triggers.Add(pointerDown);
-        eventTrigger.triggers.Add(pointerUp);
-
+        // 1. Gather scene components
         LoadClasses();
-        Load();
+
+        // 2. Load custom data configurations into those components
+        LoadFromFile();
+
+        // 3. Inform SerialManager to safely begin operation with validated setup values
+        if (SerialManager.Instance != null)
+        {
+            SerialManager.Instance.InitSerial();
+        }
+
+        if (objects.Count > 0)
+            LoadDetails(objects[0]);
+
         close.onClick.AddListener(HidePanel);
-        apply.onClick.AddListener(Save);
+        apply.onClick.AddListener(HandleApplyButton);
         reset.onClick.AddListener(ResetValues);
     }
-    public void ShowPanel()
+
+    void HandleApplyButton()
     {
-        if (isOpen) return;
-        isOpen = true;
+        SaveToFile();
 
-        panel.gameObject.SetActive(true);
-
-        float width = panel.rect.width;
-        panel.anchoredPosition = new Vector2(-(width + showX), panel.anchoredPosition.y);
-
-        panel.DOAnchorPosX(showX, duration)
-            .SetEase(Ease.InOutQuad);
-    }
-
-    public void HidePanel()
-    {
-        if (!isOpen) return;
-        isOpen = false;
-
-        float width = panel.rect.width;
-
-        panel.DOAnchorPosX(-(showX + width), duration)
-            .SetEase(Ease.InOutQuad)
-            .OnComplete(() => panel.gameObject.SetActive(false));
-    }
-    void Update()
-    {
-        // Hold-to-open
-        if (holding)
+        // Re-initialize serial port connection parameters seamlessly if modified
+        if (SerialManager.Instance != null)
         {
-            holdTimer += Time.unscaledDeltaTime;
+            SerialManager.Instance.InitSerial();
+        }
+    }
 
-            if (holdTimer >= holdTime)
+    void SaveToFile()
+    {
+        List<string> lines = new();
+
+        foreach (object o in objects)
+        {
+            Type type = o.GetType();
+            string prefix = type.Name + ".";
+
+            foreach (FieldInfo f in type.GetFields())
             {
-                holding = false;
-                holdTimer = 0f;
-                ShowPanel();
+                if (!f.IsDefined(typeof(TabField), true))
+                    continue;
+
+                string key = prefix + f.Name;
+                object value = f.GetValue(o);
+
+                lines.Add($"{key}={value}");
             }
         }
 
-        // Ctrl + D shortcut
-        bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        File.WriteAllLines(path, lines);
+    }
 
-        if (ctrl && Input.GetKeyDown(KeyCode.D))
+    void LoadFromFile()
+    {
+        if (!File.Exists(path)) return;
+
+        var lines = File.ReadAllLines(path);
+        Dictionary<string, string> data = new();
+
+        foreach (var line in lines)
         {
-            if (isOpen)
-                HidePanel();
-            else
-                ShowPanel();
+            if (!line.Contains("=")) continue;
+
+            var sp = line.Split('=');
+            data[sp[0]] = sp[1];
+        }
+
+        foreach (object o in objects)
+        {
+            Type type = o.GetType();
+            string prefix = type.Name + ".";
+
+            foreach (FieldInfo f in type.GetFields())
+            {
+                if (!f.IsDefined(typeof(TabField), true))
+                    continue;
+
+                string key = prefix + f.Name;
+                if (!data.ContainsKey(key)) continue;
+
+                string v = data[key];
+
+                try
+                {
+                    if (f.FieldType == typeof(int))
+                        f.SetValue(o, int.Parse(v));
+                    else if (f.FieldType == typeof(float))
+                        f.SetValue(o, float.Parse(v));
+                    else if (f.FieldType == typeof(bool))
+                        f.SetValue(o, bool.Parse(v));
+                    else if (f.FieldType == typeof(string))
+                        f.SetValue(o, v);
+                }
+                catch { }
+            }
         }
     }
+
     void LoadClasses()
     {
-        foreach (Transform c in modulesContent)
-            Destroy(c.gameObject);
+        foreach (Transform t in modulesContent)
+            Destroy(t.gameObject);
 
         objects.Clear();
-        defaults.Clear();
 
-        var sceneObjects = FindObjectsByType<MonoBehaviour>(
-            FindObjectsInactive.Include,
-            FindObjectsSortMode.None
-        );
+        var sceneObjects =
+            FindObjectsByType<MonoBehaviour>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None
+            );
 
         foreach (var mb in sceneObjects)
         {
-            var type = mb.GetType();
+            Type type = mb.GetType();
 
             if (!type.IsDefined(typeof(HasTabField), true))
                 continue;
 
+            objects.Add(mb);
 
-            object obj = mb;
+            GameObject b = Instantiate(moduleButton, modulesContent);
+            b.GetComponentInChildren<TMP_Text>().text = type.Name;
 
-            objects.Add(obj);
-
-
-            var copy = Activator.CreateInstance(type);
-
-            JsonUtility.FromJsonOverwrite(
-                JsonUtility.ToJson(obj),
-                copy
-            );
-
-            defaults[obj] = copy;
-
-
-            var b = Instantiate(moduleButton, modulesContent);
-
-            b.GetComponentInChildren<TMP_Text>()
-            .text = type.Name;
-
-
-            b.GetComponent<Button>()
-            .onClick.AddListener(() => LoadDetails(obj));
+            b.GetComponent<Button>().onClick.AddListener(() =>
+                LoadDetails(mb));
         }
     }
 
     void Clear()
     {
-        foreach (Transform c in detailsContent)
-            Destroy(c.gameObject);
+        foreach (Transform t in detailsContent)
+            Destroy(t.gameObject);
     }
 
     void LoadDetails(object obj)
@@ -191,9 +201,9 @@ public class ControlPanel : MonoBehaviour
         current = obj;
         Clear();
 
-        var type = obj.GetType();
+        Type type = obj.GetType();
 
-        foreach (var f in type.GetFields())
+        foreach (FieldInfo f in type.GetFields())
         {
             if (!f.IsDefined(typeof(TabField), true))
                 continue;
@@ -201,158 +211,228 @@ public class ControlPanel : MonoBehaviour
             CreateField(f, obj);
         }
 
-        foreach (var m in type.GetMethods())
+        foreach (MethodInfo m in type.GetMethods())
         {
             if (!m.IsDefined(typeof(TabButton), true))
                 continue;
 
-            var go = Instantiate(triggerPrefab, detailsContent);
-            go.transform.Find("Title").GetComponent<TMP_Text>().text = m.Name;
-
-            go.GetComponentInChildren<Button>()
-            .onClick.AddListener(() => m.Invoke(obj, null));
+            GameObject go = Instantiate(triggerPrefab, detailsContent);
+            go.GetComponentInChildren<TMP_Text>().text = m.Name;
+            go.GetComponentInChildren<Button>().onClick.AddListener(() => m.Invoke(obj, null));
         }
     }
-
 
     void CreateField(FieldInfo f, object obj)
     {
         GameObject prefab = null;
 
-        if (f.FieldType == typeof(string))
-            prefab = stringPrefab;
-
-        else if (f.FieldType == typeof(int))
-            prefab = integerPrefab;
-
-        else if (f.FieldType == typeof(float) ||
-                f.FieldType == typeof(double))
-            prefab = decimalPrefab;
-
-        else if (f.FieldType == typeof(bool))
-            prefab = booleanPrefab;
-
+        if (f.FieldType == typeof(string)) prefab = stringPrefab;
+        else if (f.FieldType == typeof(int)) prefab = integerPrefab;
+        else if (f.FieldType == typeof(float)) prefab = decimalPrefab;
+        else if (f.FieldType == typeof(bool)) prefab = booleanPrefab;
 
         if (prefab == null) return;
 
-
-        var go = Instantiate(prefab, detailsContent);
-
-        go.transform.Find("Title")
-        .GetComponent<TMP_Text>().text = f.Name;
-
+        GameObject go = Instantiate(prefab, detailsContent);
+        go.GetComponentInChildren<TMP_Text>().text = f.Name;
 
         if (f.FieldType == typeof(string))
         {
             var input = go.GetComponentInChildren<TMP_InputField>();
-            input.text = (string)f.GetValue(obj);
-            input.onEndEdit.AddListener(v => f.SetValue(obj, v));
+            input.text = f.GetValue(obj)?.ToString() ?? "";
+            input.onEndEdit.AddListener(v =>
+            {
+                f.SetValue(obj, v);
+                SaveToFile();
+            });
+        }
+
+        if (f.FieldType == typeof(float))
+        {
+            var input = go.GetComponentInChildren<TMP_InputField>();
+            Button[] buttons = go.GetComponentsInChildren<Button>();
+
+            void Refresh(float v)
+            {
+                f.SetValue(obj, v);
+                input.text = v.ToString("0.00");
+            }
+
+            float v0 = (float)f.GetValue(obj);
+            Refresh(v0);
+
+            input.onEndEdit.AddListener(v =>
+            {
+                if (float.TryParse(v, out float p))
+                {
+                    Refresh(p);
+                    SaveToFile();
+                }
+            });
+
+            buttons[0].onClick.AddListener(() =>
+            {
+                Refresh((float)f.GetValue(obj) + 0.1f);
+                SaveToFile();
+            });
+
+            buttons[1].onClick.AddListener(() =>
+            {
+                Refresh((float)f.GetValue(obj) - 0.1f);
+                SaveToFile();
+            });
         }
 
         if (f.FieldType == typeof(int))
         {
             var input = go.GetComponentInChildren<TMP_InputField>();
-            input.text = f.GetValue(obj).ToString();
+            Button[] buttons = go.GetComponentsInChildren<Button>();
 
-            var buttons = go.GetComponentsInChildren<Button>();
-
-            buttons[0].onClick.AddListener(() => {
-                int v = (int)f.GetValue(obj) - 1;
+            void Refresh(int v)
+            {
                 f.SetValue(obj, v);
                 input.text = v.ToString();
+            }
+
+            int v0 = (int)f.GetValue(obj);
+            Refresh(v0);
+
+            input.onEndEdit.AddListener(v =>
+            {
+                if (int.TryParse(v, out int p))
+                {
+                    Refresh(p);
+                    SaveToFile();
+                }
             });
 
-            buttons[1].onClick.AddListener(() => {
-                int v = (int)f.GetValue(obj) + 1;
-                f.SetValue(obj, v);
-                input.text = v.ToString();
-            });
-        }
-
-
-        if (f.FieldType == typeof(float))
-        {
-            var input = go.GetComponentInChildren<TMP_InputField>();
-            input.text = f.GetValue(obj).ToString();
-
-            var buttons = go.GetComponentsInChildren<Button>();
-
-            buttons[0].onClick.AddListener(() => {
-                float v = (float)f.GetValue(obj) - 0.1f;
-                f.SetValue(obj, v);
-                input.text = v.ToString("0.0");
+            buttons[0].onClick.AddListener(() =>
+            {
+                Refresh((int)f.GetValue(obj) + 1);
+                SaveToFile();
             });
 
-            buttons[1].onClick.AddListener(() => {
-                float v = (float)f.GetValue(obj) + 0.1f;
-                f.SetValue(obj, v);
-                input.text = v.ToString("0.0");
+            buttons[1].onClick.AddListener(() =>
+            {
+                Refresh((int)f.GetValue(obj) - 1);
+                SaveToFile();
             });
         }
-
 
         if (f.FieldType == typeof(bool))
         {
-            var b = go.GetComponentInChildren<Button>();
-            var txt = b.GetComponentInChildren<TMP_Text>();
+            var button = go.GetComponentInChildren<Button>();
+            var text = button.GetComponentInChildren<TMP_Text>();
 
-            Action refresh = () => {
-                bool v = (bool)f.GetValue(obj);
-                txt.text = v.ToString();
-            };
+            void Refresh()
+            {
+                text.text = ((bool)f.GetValue(obj)).ToString();
+            }
 
-            b.onClick.AddListener(() => {
+            button.onClick.AddListener(() =>
+            {
                 f.SetValue(obj, !(bool)f.GetValue(obj));
-                refresh();
+                Refresh();
+                SaveToFile();
             });
 
-            refresh();
+            Refresh();
         }
     }
 
-
-    void Save()
-    {
-        SaveData data = new();
-
-        foreach (var o in objects)
-        {
-            data.values.Add(JsonUtility.ToJson(o));
-        }
-
-        File.WriteAllText(path, JsonUtility.ToJson(data, true));
-
-        Debug.Log("Saved: " + path);
-    }
-
-    void Load()
-    {
-        if (!File.Exists(path))
-            return;
-
-        SaveData data = JsonUtility.FromJson<SaveData>(
-            File.ReadAllText(path)
-        );
-
-        for (int i = 0; i < data.values.Count && i < objects.Count; i++)
-        {
-            JsonUtility.FromJsonOverwrite(
-                data.values[i],
-                objects[i]
-            );
-        }
-    }
     void ResetValues()
     {
-        foreach (var o in objects)
+        foreach (object o in objects)
         {
-            var d = defaults[o];
+            Type type = o.GetType();
+            object fresh = Activator.CreateInstance(type);
 
-            foreach (var f in o.GetType().GetFields())
-                f.SetValue(o, f.GetValue(d));
+            foreach (FieldInfo f in type.GetFields())
+            {
+                if (!f.IsDefined(typeof(TabField), true)) continue;
+                f.SetValue(o, f.GetValue(fresh));
+            }
+        }
+
+        SaveToFile();
+
+        if (SerialManager.Instance != null)
+        {
+            SerialManager.Instance.InitSerial();
         }
 
         if (current != null)
             LoadDetails(current);
+    }
+
+    void SetupHoldButton()
+    {
+        var trigger = invisibleButton.gameObject.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+
+        var down = new UnityEngine.EventSystems.EventTrigger.Entry
+        {
+            eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown
+        };
+        down.callback.AddListener(e =>
+        {
+            holding = true;
+            holdTimer = 0;
+        });
+
+        var up = new UnityEngine.EventSystems.EventTrigger.Entry
+        {
+            eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp
+        };
+        up.callback.AddListener(e =>
+        {
+            holding = false;
+            holdTimer = 0;
+        });
+
+        trigger.triggers.Add(down);
+        trigger.triggers.Add(up);
+    }
+
+    void ShowPanel()
+    {
+        if (isOpen) return;
+        isOpen = true;
+        panel.gameObject.SetActive(true);
+        panel.DOAnchorPosX(showX, duration);
+    }
+
+    void HidePanel()
+    {
+        if (!isOpen) return;
+        isOpen = false;
+        float w = panel.rect.width;
+        panel.DOAnchorPosX(-(showX + w), duration)
+            .OnComplete(() => panel.gameObject.SetActive(false));
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.D) && Input.GetKey(KeyCode.LeftControl))
+        {
+            TogglePanel();
+        }
+
+        if (!holding) return;
+
+        holdTimer += Time.unscaledDeltaTime;
+
+        if (holdTimer >= holdTime)
+        {
+            holding = false;
+            TogglePanel();
+        }
+    }
+
+    private void TogglePanel()
+    {
+        if (isOpen)
+            HidePanel();
+        else
+            ShowPanel();
     }
 }

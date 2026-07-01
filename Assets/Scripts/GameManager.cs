@@ -1,9 +1,8 @@
-using System;
-using System.Collections;
 using System.IO;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [DefaultExecutionOrder(-100)]
 [HasTabField]
@@ -21,7 +20,6 @@ public class GameManager : MonoBehaviour
     public int Round = 0;
     [TabField]
     public float gameOverTimeout = 3f;
-
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip powerPelletClip;
@@ -34,7 +32,7 @@ public class GameManager : MonoBehaviour
 
     public int score { get; private set; } = 0;
     [TabField]
-    public int lives = 3;
+    int lives = 1;
     private int highScore = 0;
 
     private int ghostMultiplier = 1;
@@ -80,21 +78,20 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         SetScore(0);
-        SetLives(3);
+        SetLives(lives);
         IdleState();
-        SerialManager.Instance.OnMessageReceived.AddListener(OnSerialMessageReceived);
     }
-
-    private void OnSerialMessageReceived(string message)
+    internal void OnSTART()
     {
-        var direction = message switch
+        if (!isGameStarted && Registration.Instance.waitingForStartButton)
         {
-            "UP" => Vector2.up,
-            "DOWN" => Vector2.down,
-            "LEFT" => Vector2.left,
-            "RIGHT" => Vector2.right,
-            _ => Vector2.zero
-        };
+            StartGame();
+            Registration.Instance?.OnGameStarted();
+        }
+
+    }
+    internal void SetPacmanDirection(Vector2 direction)
+    {
         if (direction != Vector2.zero)
             pacman.SetExternalDirection(direction);
     }
@@ -103,15 +100,6 @@ public class GameManager : MonoBehaviour
     {
         if (showingGameOver)
             return;
-
-        if (!isGameStarted && IsKeyboardKeyDown())
-        {
-            StartGame();
-        }
-        else if (lives <= 0 && IsKeyboardKeyDown())
-        {
-            NewGame();
-        }
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.L))
         {
             ClearHighScore();
@@ -126,26 +114,6 @@ public class GameManager : MonoBehaviour
         UpdateHighScoreText();
         Debug.Log("High score reset to 0.");
     }
-
-    private bool IsKeyboardKeyDown()
-    {
-        if (!string.IsNullOrEmpty(Input.inputString))
-        {
-            return true;
-        }
-
-        return Input.GetKeyDown(KeyCode.Space) ||
-               Input.GetKeyDown(KeyCode.Return) ||
-               Input.GetKeyDown(KeyCode.KeypadEnter) ||
-               Input.GetKeyDown(KeyCode.UpArrow) ||
-               Input.GetKeyDown(KeyCode.DownArrow) ||
-               Input.GetKeyDown(KeyCode.LeftArrow) ||
-               Input.GetKeyDown(KeyCode.RightArrow) ||
-               Input.GetKeyDown(KeyCode.Escape) ||
-               Input.GetKeyDown(KeyCode.Tab) ||
-               Input.GetKeyDown(KeyCode.Backspace);
-    }
-
     private void IdleState()
     {
         gameOverText.enabled = true;
@@ -189,7 +157,7 @@ public class GameManager : MonoBehaviour
     {
         isGameStarted = false;
         SetScore(0);
-        SetLives(3);
+        SetLives(1);
         IdleState();
         Round = 0;
     }
@@ -211,7 +179,7 @@ public class GameManager : MonoBehaviour
         pacman.movement.canMove = true;
     }
 
-    private void GameOver()
+    internal void GameOver()
     {
         gameOverText.enabled = false;
 
@@ -229,12 +197,12 @@ public class GameManager : MonoBehaviour
             SaveHighScore();
             UpdateHighScoreText();
         }
+        Registration.Instance?.OnEnd();
 
         if (gameOverClip != null)
         {
             audioSource.PlayOneShot(gameOverClip);
         }
-
         ShowGameOverScreen();
     }
 

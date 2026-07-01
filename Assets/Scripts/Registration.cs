@@ -6,9 +6,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ClawMachineGameFlow : MonoBehaviour
+public class Registration : MonoBehaviour
 {
-    public static ClawMachineGameFlow Instance;
+    public static Registration Instance;
 
     private enum PageState
     {
@@ -27,7 +27,6 @@ public class ClawMachineGameFlow : MonoBehaviour
     [Header("Navigation Buttons")]
     [SerializeField] private Button page1NextButton;
     [SerializeField] private Button page2DoneButton;
-    [SerializeField] private Button playButton;
 
     [Header("Input Fields (page 2)")]
     [SerializeField] private TMP_InputField nameInput;
@@ -38,37 +37,24 @@ public class ClawMachineGameFlow : MonoBehaviour
     [SerializeField] private List<Button> keyButtons = new List<Button>();
     [SerializeField] private Button spaceButton;
     [SerializeField] private Button backButton;
-    [SerializeField] private List<Button> lowercaseButtons = new List<Button>();
-    [SerializeField] private List<Button> uppercaseButtons = new List<Button>();
-    [SerializeField] private List<Button> numbersButtons = new List<Button>();
-    [SerializeField] private GameObject lowercasePage;
-    [SerializeField] private GameObject uppercasePage;
-    [SerializeField] private GameObject numbersPage;
 
     private readonly List<GameObject> pages = new List<GameObject>();
     private readonly List<KeyBinding> keyboardBindings = new List<KeyBinding>();
 
-    private enum KeyboardPage
-    {
-        Lowercase,
-        Uppercase,
-        Numbers
-    }
+    [Header("Validation")]
+    [SerializeField] private float shakeStrength = 10f;
+    [SerializeField] private float shakeDuration = 0.3f;
+
 
     private PageState currentState = PageState.Page1;
     private TMP_InputField activeInput;
-    private bool waitingForYellowButton;
-    private KeyboardPage currentKeyboardPage = KeyboardPage.Lowercase;
-    private Tween gameTimeoutTween;
-
-    private bool IsSingleKeyboardLayout =>
-        lowercasePage == null && uppercasePage == null && numbersPage == null;
+    internal bool waitingForStartButton;
+    internal bool waitingForEndButton;
 
     private class KeyBinding
     {
         public Button Button;
         public string Value;
-        public KeyboardPage Page;
     }
 
     private void Awake()
@@ -80,7 +66,81 @@ public class ClawMachineGameFlow : MonoBehaviour
         RegisterInputSelection();
         ShowPage(PageState.Page1);
     }
+    private GameObject GetValidationObject(TMP_InputField field)
+    {
+        if (field == null) return null;
+        return field.transform.Find("Validation")?.gameObject;
+    }
+    private bool IsValidName(string name)
+    {
+        return !string.IsNullOrWhiteSpace(name);
+    }
 
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        return System.Text.RegularExpressions.Regex.IsMatch(email, pattern);
+    }
+
+    private bool IsValidPhone(string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone))
+            return false;
+
+        return System.Text.RegularExpressions.Regex.IsMatch(phone, @"^\d+$");
+    }
+    private void ShakeField(TMP_InputField field)
+    {
+        if (field == null) return;
+
+        RectTransform rt = field.GetComponent<RectTransform>();
+        if (rt == null) return;
+
+        rt.DOComplete();
+        rt.DOShakeAnchorPos(shakeDuration, shakeStrength);
+    }
+    private bool ValidateInputs()
+    {
+        bool valid = true;
+
+        // NAME
+        bool nameValid = IsValidName(nameInput.text);
+        ToggleValidationUI(nameInput, nameValid);
+        if (!nameValid)
+        {
+            ShakeField(nameInput);
+            valid = false;
+        }
+
+        // EMAIL
+        bool emailValid = IsValidEmail(emailInput.text);
+        ToggleValidationUI(emailInput, emailValid);
+        if (!emailValid)
+        {
+            ShakeField(emailInput);
+            valid = false;
+        }
+
+        // PHONE
+        bool phoneValid = IsValidPhone(phoneInput.text);
+        ToggleValidationUI(phoneInput, phoneValid);
+        if (!phoneValid)
+        {
+            ShakeField(phoneInput);
+            valid = false;
+        }
+
+        return valid;
+    }
+    private void ToggleValidationUI(TMP_InputField field, bool isValid)
+    {
+        GameObject validation = GetValidationObject(field);
+        if (validation != null)
+            validation.SetActive(!isValid);
+    }
     private void HandleCharacterKey(string character)
     {
         if (currentState != PageState.Page2 || activeInput == null)
@@ -105,17 +165,21 @@ public class ClawMachineGameFlow : MonoBehaviour
 
     private void OnPage2Done()
     {
+        bool isValid = ValidateInputs();
+
+        if (!isValid)
+            return;
+
         SaveRegistrationToCsv();
         ShowPage(PageState.Page3);
     }
 
     public void OnEnd()
     {
-        if (waitingForYellowButton)
+        Debug.Log("ON END " + waitingForEndButton);
+        if (waitingForEndButton)
         {
-            waitingForYellowButton = false;
-
-            gameTimeoutTween?.Kill();
+            waitingForEndButton = false;
 
             ShowPage(PageState.Page4GameOver);
 
@@ -133,17 +197,13 @@ public class ClawMachineGameFlow : MonoBehaviour
 
         ShowPage(PageState.Page1);
 
-        SetKeyboardPage(KeyboardPage.Lowercase);
 
-        if (playButton != null)
-            playButton.interactable = true;
-
-        waitingForYellowButton = false;
+        waitingForEndButton = false;
     }
 
     private void SaveRegistrationToCsv()
     {
-        string filePath = Path.Combine(Application.persistentDataPath, "registrations.csv");
+        string filePath = Path.Combine(Application.dataPath, "registrations.csv");
 
         bool fileExists = File.Exists(filePath);
 
@@ -183,40 +243,10 @@ public class ClawMachineGameFlow : MonoBehaviour
         return value;
     }
 
-    private void OnPlayPressed()
+    internal void OnGameStarted()
     {
-        if (currentState != PageState.Page3)
-        {
-            return;
-        }
-
-        SendStartToSerial();
-
-        waitingForYellowButton = true;
-        playButton.interactable = false;
-
-        gameTimeoutTween?.Kill();
-
-        gameTimeoutTween = DOVirtual.DelayedCall(
-            SerialManager.Instance.gameTime,
-            () =>
-            {
-                if (waitingForYellowButton)
-                {
-                    Debug.Log("Game Timeout Reached");
-                    SendStopToSerial();
-                    OnEnd();
-                }
-            });
-    }
-
-    private void SendStartToSerial()
-    {
-        SerialManager.Instance.SendStartToSerial();
-    }
-    private void SendStopToSerial()
-    {
-        SerialManager.Instance.SendStopToSerial();
+        waitingForStartButton = false;
+        waitingForEndButton = true;
     }
 
     private void SetActiveInput(TMP_InputField input)
@@ -234,9 +264,9 @@ public class ClawMachineGameFlow : MonoBehaviour
             pages[i].SetActive(i == (int)state);
         }
 
-        if (state == PageState.Page3 && playButton != null)
+        if (state == PageState.Page3)
         {
-            playButton.interactable = true;
+            waitingForStartButton = true;
         }
     }
 
@@ -253,7 +283,6 @@ public class ClawMachineGameFlow : MonoBehaviour
     {
         AutoCollectKeyboardKeys();
         BuildKeyboardBindings();
-        UpdateKeyboardPageObjects();
 
         if (page1NextButton != null)
         {
@@ -265,12 +294,6 @@ public class ClawMachineGameFlow : MonoBehaviour
         {
             page2DoneButton.onClick.RemoveAllListeners();
             page2DoneButton.onClick.AddListener(OnPage2Done);
-        }
-
-        if (playButton != null)
-        {
-            playButton.onClick.RemoveAllListeners();
-            playButton.onClick.AddListener(OnPlayPressed);
         }
 
         for (int i = 0; i < keyboardBindings.Count; i++)
@@ -286,13 +309,6 @@ public class ClawMachineGameFlow : MonoBehaviour
             binding.Button.onClick.AddListener(() => OnKeyboardKeyPressed(binding));
         }
 
-        if (!IsSingleKeyboardLayout)
-        {
-            WireModeButtons(lowercaseButtons, KeyboardPage.Lowercase);
-            WireModeButtons(uppercaseButtons, KeyboardPage.Uppercase);
-            WireModeButtons(numbersButtons, KeyboardPage.Numbers);
-        }
-
         if (spaceButton != null)
         {
             spaceButton.onClick.RemoveAllListeners();
@@ -305,182 +321,48 @@ public class ClawMachineGameFlow : MonoBehaviour
             backButton.onClick.AddListener(HandleBackspace);
         }
 
-        ApplyKeyboardState();
     }
 
     private void OnKeyboardKeyPressed(KeyBinding binding)
     {
-        string value = ResolveKeyValue(binding);
-
-        if (string.IsNullOrEmpty(value))
-        {
-            return;
-        }
-
-        HandleCharacterKey(value);
+        HandleCharacterKey(binding.Value);
     }
 
     private string ResolveKeyValue(KeyBinding binding)
     {
         if (binding == null)
-        {
             return string.Empty;
-        }
-
-        if (!IsSingleKeyboardLayout && binding.Page != currentKeyboardPage)
-        {
-            return string.Empty;
-        }
 
         return binding.Value;
     }
 
-    private void SetKeyboardPage(KeyboardPage keyboardPage)
-    {
-        currentKeyboardPage = keyboardPage;
-        UpdateKeyboardPageObjects();
-        ApplyKeyboardState();
-    }
 
-    private void UpdateKeyboardPageObjects()
-    {
-        if (IsSingleKeyboardLayout)
-        {
-            return;
-        }
-
-        if (lowercasePage != null)
-            lowercasePage.SetActive(currentKeyboardPage == KeyboardPage.Lowercase);
-
-        if (uppercasePage != null)
-            uppercasePage.SetActive(currentKeyboardPage == KeyboardPage.Uppercase);
-
-        if (numbersPage != null)
-            numbersPage.SetActive(currentKeyboardPage == KeyboardPage.Numbers);
-    }
-
-    private void ApplyKeyboardState()
-    {
-        for (int i = 0; i < keyboardBindings.Count; i++)
-        {
-            KeyBinding binding = keyboardBindings[i];
-
-            if (binding == null || binding.Button == null)
-            {
-                continue;
-            }
-
-            if (IsSingleKeyboardLayout)
-            {
-                binding.Button.gameObject.SetActive(true);
-                binding.Button.interactable = true;
-                continue;
-            }
-
-            bool isVisible = binding.Page == currentKeyboardPage;
-
-            binding.Button.gameObject.SetActive(isVisible);
-            binding.Button.interactable = isVisible;
-        }
-    }
 
     private void BuildKeyboardBindings()
     {
         keyboardBindings.Clear();
 
-        AddBindingsFromPage(lowercasePage, KeyboardPage.Lowercase);
-        AddBindingsFromPage(uppercasePage, KeyboardPage.Uppercase);
-        AddBindingsFromPage(numbersPage, KeyboardPage.Numbers);
-
-        if (keyboardBindings.Count == 0)
+        foreach (Button button in keyButtons)
         {
-            AddBindingsFromSingleKeyboardLayout();
+            TryAddKeyBinding(button);
         }
     }
 
-    private void AddBindingsFromSingleKeyboardLayout()
+    private void TryAddKeyBinding(Button button)
     {
-        Transform root = null;
-
-        var kbGo = GameObject.Find("KeyboardRoot");
-
-        if (kbGo != null)
-        {
-            root = kbGo.transform;
-        }
-        else if (page2 != null)
-        {
-            root = page2.transform.Find("KeyboardRoot");
-        }
-
-        if (root == null)
-        {
-            foreach (Button button in keyButtons)
-            {
-                TryAddKeyBinding(button, KeyboardPage.Lowercase);
-            }
-
+        if (button == null)
             return;
-        }
-
-        foreach (Button button in root.GetComponentsInChildren<Button>(true))
-        {
-            TryAddKeyBinding(button, KeyboardPage.Lowercase);
-        }
-    }
-
-    private void TryAddKeyBinding(Button button, KeyboardPage page)
-    {
-        if (button == null || !button.gameObject.name.StartsWith("Key_"))
-        {
-            return;
-        }
 
         string value = GetBaseKeyValue(button);
 
         if (string.IsNullOrEmpty(value))
-        {
             return;
-        }
 
         keyboardBindings.Add(new KeyBinding
         {
             Button = button,
-            Value = value,
-            Page = page
+            Value = value
         });
-    }
-
-    private void AddBindingsFromPage(GameObject page, KeyboardPage keyboardPage)
-    {
-        if (page == null)
-        {
-            return;
-        }
-
-        Button[] pageButtons = page.GetComponentsInChildren<Button>(true);
-
-        foreach (Button button in pageButtons)
-        {
-            if (button == null || !button.gameObject.name.StartsWith("Key_"))
-            {
-                continue;
-            }
-
-            string value = GetBaseKeyValue(button);
-
-            if (string.IsNullOrEmpty(value))
-            {
-                continue;
-            }
-
-            keyboardBindings.Add(new KeyBinding
-            {
-                Button = button,
-                Value = value,
-                Page = keyboardPage
-            });
-        }
     }
 
     private void RegisterInputSelection()
@@ -527,11 +409,6 @@ public class ClawMachineGameFlow : MonoBehaviour
             if (go != null) page2DoneButton = go.GetComponent<Button>();
         }
 
-        if (playButton == null)
-        {
-            var go = GameObject.Find("PlayButton");
-            if (go != null) playButton = go.GetComponent<Button>();
-        }
 
         if (spaceButton == null)
         {
@@ -563,23 +440,6 @@ public class ClawMachineGameFlow : MonoBehaviour
             if (go != null) phoneInput = go.GetComponent<TMP_InputField>();
         }
 
-        if (lowercasePage == null)
-        {
-            var go = GameObject.Find("LowercasePage");
-            if (go != null) lowercasePage = go;
-        }
-
-        if (uppercasePage == null)
-        {
-            var go = GameObject.Find("UppercasePage");
-            if (go != null) uppercasePage = go;
-        }
-
-        if (numbersPage == null)
-        {
-            var go = GameObject.Find("NumbersPage");
-            if (go != null) numbersPage = go;
-        }
     }
 
     private void AutoCollectKeyboardKeys()
@@ -621,21 +481,5 @@ public class ClawMachineGameFlow : MonoBehaviour
         TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
 
         return label != null ? label.text : string.Empty;
-    }
-
-    private void WireModeButtons(List<Button> buttons, KeyboardPage page)
-    {
-        for (int i = 0; i < buttons.Count; i++)
-        {
-            Button button = buttons[i];
-
-            if (button == null)
-            {
-                continue;
-            }
-
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => SetKeyboardPage(page));
-        }
     }
 }

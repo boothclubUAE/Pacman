@@ -1,6 +1,6 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
-using System.IO;
 using System.IO.Ports;
 using System.Threading;
 using UnityEngine;
@@ -11,155 +11,254 @@ public class SerialManager : MonoBehaviour
 {
     public static SerialManager Instance;
 
-    [TabField]
-    public string portName = "COM5";
-    [TabField]
-    public int baudRate = 115200;
-    [TabField]
-    public float BufferTimeout = 1f;
+    [TabField] public string portName = "COM5";
+    [TabField] public int baudRate = 115200;
+    [TabField] public int bufferTimeout = 1;
 
     private SerialPort port;
     private Thread readThread;
     private bool running;
-    private float bufferTimer;
-    private bool clearingBuffer = false;
-    private readonly ConcurrentQueue<string> messageQueue = new ConcurrentQueue<string>();
 
-    public UnityEvent<string> OnMessageReceived;
+    private readonly ConcurrentQueue<string> messageQueue = new();
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
+        Debug.Log("[Serial] Awake called. Waiting for ControlPanel initialization.");
     }
 
     private void Start()
     {
+        // NOTE: We don't call OpenPort() immediately because ControlPanel 
+        // needs to run its Start() and load settings from settings.txt first.
+        // ControlPanel will explicitly call InitSerial() when ready.
+    }
+
+    public void InitSerial()
+    {
+        Debug.Log($"[Serial] Initializing connection using ControlPanel data: {portName} @ {baudRate}");
+
+        // Safety cleanup if already open
+        StopSerialThreadAndPort();
+
         try
         {
             port = new SerialPort(portName, baudRate)
             {
                 ReadTimeout = 500,
+                WriteTimeout = 500,
+                DtrEnable = true,
+                RtsEnable = true,
+                Handshake = Handshake.None,
+                Parity = Parity.None,
+                DataBits = 8,
+                StopBits = StopBits.One,
                 NewLine = "\n"
             };
 
             port.Open();
+            Debug.Log("[Serial] Opened successfully");
+
             port.DiscardInBuffer();
+            port.DiscardOutBuffer();
 
-            Debug.Log($"Serial Opened: {portName} @ {baudRate}");
-
-            // Start buffer clearing phase
-            clearingBuffer = true;
-            bufferTimer = BufferTimeout;
-
-            running = true;
-
-            readThread = new Thread(ReadSerial);
-            readThread.Start();
+            StartCoroutine(BufferWarmupThenStart());
         }
         catch (Exception e)
         {
-            Debug.LogError("Serial connection failed: " + e.Message);
+            Debug.LogError("[Serial] FAILED TO OPEN");
+            Debug.LogException(e);
         }
+    }
+
+    private IEnumerator BufferWarmupThenStart()
+    {
+        float timer = 0f;
+
+        while (timer < bufferTimeout)
+        {
+            timer += Time.deltaTime;
+            try
+            {
+                if (port != null && port.IsOpen)
+                {
+                    port.DiscardInBuffer();
+                    port.DiscardOutBuffer();
+                }
+            }
+            catch { }
+
+            yield return null;
+        }
+
+        running = true;
+        readThread = new Thread(ReadSerial)
+        {
+            IsBackground = true
+        };
+        readThread.Start();
+
+        Debug.Log("[Serial] Read thread started");
     }
 
     private void Update()
     {
         while (messageQueue.TryDequeue(out string message))
         {
-            if (clearingBuffer)
-                continue;
-
-            Debug.Log("From Arduino: " + message);
-            OnMessageReceived?.Invoke(message);
-        }
-
-        // handle buffer timeout countdown
-        if (clearingBuffer)
-        {
-            bufferTimer -= Time.deltaTime;
-
-            if (bufferTimer <= 0f)
+            Debug.Log("Arduino -> " + message);
+            if (message.Equals("START", StringComparison.OrdinalIgnoreCase))
+                GameManager.Instance?.OnSTART();
+            else if (message.Equals("END", StringComparison.OrdinalIgnoreCase))
             {
-                clearingBuffer = false;
-                port?.DiscardInBuffer(); // final clean
-                Debug.Log("Serial buffer cleared, now listening.");
+                Registration.Instance?.OnEnd();
+                GameManager.Instance?.GameOver();
             }
+            else if (message.Equals("LEFT", StringComparison.OrdinalIgnoreCase))
+                GameManager.Instance?.SetPacmanDirection(Vector2.left);
+            else if (message.Equals("RIGHT", StringComparison.OrdinalIgnoreCase))
+                GameManager.Instance?.SetPacmanDirection(Vector2.right);
+            else if (message.Equals("UP", StringComparison.OrdinalIgnoreCase))
+                GameManager.Instance?.SetPacmanDirection(Vector2.up);
+            else if (message.Equals("DOWN", StringComparison.OrdinalIgnoreCase))
+                GameManager.Instance?.SetPacmanDirection(Vector2.down);
         }
     }
 
-    public void SendToSerial(string message)
+    private void Send(string message)
     {
-        if (port != null && port.IsOpen)
+        if (port == null || !port.IsOpen)
+        {
+            Debug.LogError("[Serial] Port not open");
+            return;
+        }
+
+        try
         {
             port.WriteLine(message);
-            Debug.Log("Sent '"+message+"' to Arduino");
+            port.BaseStream.Flush();
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
+
     private void ReadSerial()
     {
-        byte[] buffer = new byte[1024];
-        int bufferCount = 0;
-
+        byte[] buffer = new byte[256];
+        string currentMessage = "";
 
         while (running)
         {
             try
             {
-                if (clearingBuffer)
+                if (port != null && port.IsOpen)
                 {
-                    port.DiscardInBuffer();
-                    bufferCount = 0;
-                    continue;
-                }
-                if (port != null && port.IsOpen && port.BytesToRead > 0)
-                {
-                    int b = port.ReadByte();
-
-                    if (b == -1)
-                        continue;
-
-                    char c = (char)b;
-
-                    if (c == '\n')
+                    int bytes = port.Read(buffer, 0, buffer.Length);
+                    if (bytes > 0)
                     {
-                        string line = System.Text.Encoding.ASCII
-                            .GetString(buffer, 0, bufferCount)
-                            .Trim('\r');
+                        string received = System.Text.Encoding.ASCII.GetString(buffer, 0, bytes);
+                        currentMessage += received;
 
-                        if (!string.IsNullOrEmpty(line))
+                        // Continuous check for keywords inside the accumulated string stream
+                        bool foundKeyword = true;
+                        while (foundKeyword)
                         {
-                            messageQueue.Enqueue(line);
-                        }
+                            foundKeyword = false;
 
-                        bufferCount = 0;
-                    }
-                    else
-                    {
-                        if (bufferCount < buffer.Length)
-                        {
-                            buffer[bufferCount++] = (byte)b;
+                            // Check for START
+                            if (currentMessage.Contains("START"))
+                            {
+                                messageQueue.Enqueue("START");
+                                int index = currentMessage.IndexOf("START");
+                                // Remove "START" from the buffer (5 characters)
+                                currentMessage = currentMessage.Remove(index, 5);
+                                foundKeyword = true;
+                            }
+
+                            // Check for END
+                            if (currentMessage.Contains("END"))
+                            {
+                                messageQueue.Enqueue("END");
+                                int index = currentMessage.IndexOf("END");
+                                // Remove "END" from the buffer (3 characters)
+                                currentMessage = currentMessage.Remove(index, 3);
+                                foundKeyword = true;
+                            }
+                            if (currentMessage.Contains("LEFT"))
+                            {
+                                messageQueue.Enqueue("LEFT");
+                                int index = currentMessage.IndexOf("LEFT");
+                                currentMessage = currentMessage.Remove(index, 4);
+                                foundKeyword = true;
+                            }
+                            if (currentMessage.Contains("RIGHT"))
+                            {
+                                messageQueue.Enqueue("RIGHT");
+                                int index = currentMessage.IndexOf("RIGHT");
+                                currentMessage = currentMessage.Remove(index, 4);
+                                foundKeyword = true;
+                            }
+                            if (currentMessage.Contains("UP"))
+                            {
+                                messageQueue.Enqueue("UP");
+                                int index = currentMessage.IndexOf("UP");
+                                currentMessage = currentMessage.Remove(index, 2);
+                                foundKeyword = true;
+                            }
+                            if (currentMessage.Contains("DOWN"))
+                            {
+                                messageQueue.Enqueue("DOWN");
+                                int index = currentMessage.IndexOf("DOWN");
+                                currentMessage = currentMessage.Remove(index, 4);
+                                foundKeyword = true;
+                            }
+
                         }
                     }
                 }
             }
+            catch (TimeoutException) { }
             catch (Exception e)
             {
-                Debug.LogError("Serial read error: " + e.Message);
+                Debug.LogError("[Serial] Read error");
+                Debug.LogException(e);
+                Thread.Sleep(100);
             }
         }
     }
 
-    private void OnApplicationQuit()
+    private void StopSerialThreadAndPort()
     {
         running = false;
 
-        if (readThread != null && readThread.IsAlive)
+        try
         {
-            readThread.Join();
+            if (readThread != null && readThread.IsAlive)
+                readThread.Join(500);
         }
+        catch { }
 
-        if (port != null && port.IsOpen)
+        try
         {
-            port.Close();
+            if (port != null)
+            {
+                if (port.IsOpen)
+                    port.Close();
+                port.Dispose();
+            }
         }
+        catch { }
+    }
+
+    private void OnApplicationQuit()
+    {
+        StopSerialThreadAndPort();
+        Debug.Log("[Serial] Closed");
     }
 }
