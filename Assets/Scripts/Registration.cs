@@ -246,7 +246,6 @@ public class Registration : MonoBehaviour
     internal void OnGameStarted()
     {
         waitingForStartButton = false;
-        waitingForEndButton = true;
     }
 
     private void SetActiveInput(TMP_InputField input)

@@ -177,6 +177,7 @@ public class GameManager : MonoBehaviour
         }
         pacman.ResetState();
         pacman.movement.canMove = true;
+        Registration.Instance.waitingForEndButton = true ;
     }
 
     internal void GameOver()
@@ -222,12 +223,14 @@ public class GameManager : MonoBehaviour
 
     private void HideGameOverScreen()
     {
-        gameOverCanvasGroup.DOFade(0f, 0.5f).OnComplete(() =>
-        {
-            gameOverCanvasGroup.gameObject.SetActive(false);
-            showingGameOver = false;
-            IdleState();
-        });
+        SerialManager.Instance.StopSerialThreadAndPort();
+        DOVirtual.DelayedCall(1,()=>SceneManager.LoadScene(0));
+        //gameOverCanvasGroup.DOFade(0f, 0.5f).OnComplete(() =>
+        //{
+        //    gameOverCanvasGroup.gameObject.SetActive(false);
+        //    showingGameOver = false;
+        //    IdleState();
+        //});
     }
 
     private void TryPlayWaka()

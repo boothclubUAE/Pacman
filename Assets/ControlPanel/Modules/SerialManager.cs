@@ -115,8 +115,11 @@ public class SerialManager : MonoBehaviour
                 GameManager.Instance?.OnSTART();
             else if (message.Equals("END", StringComparison.OrdinalIgnoreCase))
             {
-                Registration.Instance?.OnEnd();
-                GameManager.Instance?.GameOver();
+                if (Registration.Instance.waitingForEndButton)
+                {
+                    Registration.Instance?.OnEnd();
+                    GameManager.Instance?.GameOver();
+                }
             }
             else if (message.Equals("LEFT", StringComparison.OrdinalIgnoreCase))
                 GameManager.Instance?.SetPacmanDirection(Vector2.left);
@@ -233,7 +236,7 @@ public class SerialManager : MonoBehaviour
         }
     }
 
-    private void StopSerialThreadAndPort()
+    public void StopSerialThreadAndPort()
     {
         running = false;
 
