@@ -115,6 +115,8 @@ public class SerialManager : MonoBehaviour
                 GameManager.Instance?.OnSTART();
             else if (message.Equals("END", StringComparison.OrdinalIgnoreCase))
             {
+                //TODO
+                return;
                 if (Registration.Instance.waitingForEndButton)
                 {
                     Registration.Instance?.OnEnd();
