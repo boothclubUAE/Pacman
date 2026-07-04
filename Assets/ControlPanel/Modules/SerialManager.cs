@@ -120,7 +120,7 @@ public class SerialManager : MonoBehaviour
                 if (Registration.Instance.waitingForEndButton)
                 {
                     Registration.Instance?.OnEnd();
-                    GameManager.Instance?.GameOver();
+                    GameManager.Instance?.GameOver("GAME CANCELED");
                 }
             }
             else if (message.Equals("LEFT", StringComparison.OrdinalIgnoreCase))

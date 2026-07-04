@@ -1,8 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using DG.Tweening;
+using NUnit.Framework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 [DefaultExecutionOrder(-100)]
 [HasTabField]
@@ -14,9 +18,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Pacman pacman;
     [SerializeField] private Transform pellets;
     [SerializeField] private TMP_Text gameOverText;
+    [SerializeField] private TMP_Text gameoverHeaderText;
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text livesText;
     [SerializeField] private TMP_Text highScoreText;
+
+    [Header("Timer Settings")]
+    [SerializeField] private TMP_Text timerText;
+    [TabField] public int powerUpTimerDuration = 60;
+    private float currentTimerValue;
+    private bool isTimerRunning = false;
+    private int powerPelletsRemaining = 4;
+
     public int Round = 0;
     [TabField]
     public float gameOverTimeout = 3f;
@@ -45,6 +58,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private CanvasGroup gameOverCanvasGroup;
     [SerializeField] private TMP_Text finalScoreText;
+    public List<Image> Powerups;
 
     [System.Serializable]
     private class HighScoreData
@@ -81,6 +95,7 @@ public class GameManager : MonoBehaviour
         SetLives(lives);
         IdleState();
     }
+
     internal void OnSTART()
     {
         if (!isGameStarted && Registration.Instance.waitingForStartButton)
@@ -88,8 +103,8 @@ public class GameManager : MonoBehaviour
             StartGame();
             Registration.Instance?.OnGameStarted();
         }
-
     }
+
     internal void SetPacmanDirection(Vector2 direction)
     {
         if (direction != Vector2.zero)
@@ -100,9 +115,40 @@ public class GameManager : MonoBehaviour
     {
         if (showingGameOver)
             return;
+
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.L))
         {
             ClearHighScore();
+        }
+
+        HandlePowerUpTimer();
+    }
+
+    private void HandlePowerUpTimer()
+    {
+        if (!isTimerRunning) return;
+
+        currentTimerValue -= Time.deltaTime;
+
+        if (currentTimerValue <= 0)
+        {
+            currentTimerValue = 0;
+            isTimerRunning = false;
+            UpdateTimerText();
+            GameOver("TIME IS UP");
+        }
+        else
+        {
+            UpdateTimerText();
+        }
+    }
+
+    private void UpdateTimerText()
+    {
+        if (timerText != null)
+        {
+            // Apply strict monospace styling with 0.6em sizing inside the TMPro markup
+            timerText.text = $"TIME:{Mathf.CeilToInt(currentTimerValue)}</size></font>";
         }
     }
 
@@ -114,10 +160,14 @@ public class GameManager : MonoBehaviour
         UpdateHighScoreText();
         Debug.Log("High score reset to 0.");
     }
+
     private void IdleState()
     {
         gameOverText.enabled = true;
         gameOverText.text = "READY!";
+
+        isTimerRunning = false;
+        if (timerText != null) timerText.text = "";
 
         foreach (var ghost in ghosts)
         {
@@ -148,33 +198,25 @@ public class GameManager : MonoBehaviour
 
         Sequence countdownSequence = DOTween.Sequence();
 
-        // Helper function to animate the text changes dynamically
         void AnimateCountdownStep(string value)
         {
-            countdownSequence.AppendCallback(() => {
+            countdownSequence.AppendCallback(() =>
+            {
                 gameOverText.text = value;
-
-                // Clean reset before running the next punch
                 textRect.DOKill();
                 textRect.localScale = Vector3.one;
                 textRect.localRotation = Quaternion.identity;
-
-                // Half power scale: punches up to x1.5 maximum instead of x2
                 textRect.DOPunchScale(Vector3.one * 0.5f, 0.4f, 4, 0.5f);
-
-                // Half power rotation: reduced max vibration angle to 10 degrees
                 textRect.DOShakeRotation(0.4f, new Vector3(0, 0, 10f), 8, 90);
             });
             countdownSequence.AppendInterval(1f);
         }
 
-        // Build the dynamic visual sequence
         AnimateCountdownStep("3");
         AnimateCountdownStep("2");
         AnimateCountdownStep("1");
         AnimateCountdownStep("GO!");
 
-        // Wrap up and start Pacman/Ghosts mechanics
         countdownSequence.OnComplete(() =>
         {
             textRect.localScale = Vector3.one;
@@ -197,6 +239,12 @@ public class GameManager : MonoBehaviour
     {
         ResetPellets();
         ResetState();
+
+        // Start power-up challenge timer
+        powerPelletsRemaining = 4;
+        currentTimerValue = powerUpTimerDuration;
+        isTimerRunning = true;
+        UpdateTimerText();
     }
 
     private void ResetState()
@@ -208,13 +256,14 @@ public class GameManager : MonoBehaviour
         }
         pacman.ResetState();
         pacman.movement.canMove = true;
-        Registration.Instance.waitingForEndButton = true ;
+        Registration.Instance.waitingForEndButton = true;
     }
 
-    internal void GameOver()
+    internal void GameOver(string gameoverText)
     {
+        isTimerRunning = false;
         gameOverText.enabled = false;
-
+        gameoverHeaderText.text = gameoverText;
         foreach (var ghost in ghosts)
             ghost.gameObject.SetActive(false);
 
@@ -255,13 +304,7 @@ public class GameManager : MonoBehaviour
     private void HideGameOverScreen()
     {
         SerialManager.Instance.StopSerialThreadAndPort();
-        DOVirtual.DelayedCall(1,()=>SceneManager.LoadScene(0));
-        //gameOverCanvasGroup.DOFade(0f, 0.5f).OnComplete(() =>
-        //{
-        //    gameOverCanvasGroup.gameObject.SetActive(false);
-        //    showingGameOver = false;
-        //    IdleState();
-        //});
+        DOVirtual.DelayedCall(1, () => SceneManager.LoadScene(0));
     }
 
     private void TryPlayWaka()
@@ -358,7 +401,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            GameOver();
+            GameOver("GAME OVER");
         }
     }
 
@@ -386,18 +429,28 @@ public class GameManager : MonoBehaviour
 
         if (!HasRemainingPellets())
         {
+            isTimerRunning = false; // Stop timer when round successfully cleared
             pacman.gameObject.SetActive(false);
             DOVirtual.DelayedCall(3, () =>
             {
                 NewRound();
                 Round++;
             });
-
         }
     }
 
     public void PowerPelletEaten(PowerPellet pellet)
     {
+        powerPelletsRemaining--;
+        DisablePowerup(pellet.id);
+        // If all 4 items are found, stop the pressure countdown
+        if (powerPelletsRemaining <= 0)
+        {
+            isTimerRunning = false;
+            GameOver("YOU WON!");
+            return;
+        }
+
         foreach (var ghost in ghosts)
         {
             ghost.frightened.Enable(pellet.duration);
@@ -411,6 +464,10 @@ public class GameManager : MonoBehaviour
         {
             audioSource.PlayOneShot(powerPelletClip);
         }
+    }
+    private void DisablePowerup(int id)
+    {
+        Powerups[id].CrossFadeAlpha(0.2f, 0.2f, true);
     }
 
     private bool HasRemainingPellets()

@@ -169,3 +169,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   points: 50
   duration: 8
+  id: 3
