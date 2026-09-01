@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
             return;
         if(Input.GetKeyDown(KeyCode.S))
         {
-            OnSTART();
+            StartGame();
         }
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.L))
         {
