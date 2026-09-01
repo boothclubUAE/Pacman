@@ -1,5 +1,6 @@
-GameManager.powerUpTimerDuration=20
+GameManager.gameTime=60
 GameManager.gameOverTimeout=3
+GameManager.livesCount=1
 SerialManager.portName=COM6
 SerialManager.baudRate=115200
 SerialManager.bufferTimeout=1
