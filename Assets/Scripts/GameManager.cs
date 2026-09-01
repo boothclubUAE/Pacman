@@ -115,7 +115,10 @@ public class GameManager : MonoBehaviour
     {
         if (showingGameOver)
             return;
-
+        if(Input.GetKeyDown(KeyCode.S))
+        {
+            OnSTART();
+        }
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.L))
         {
             ClearHighScore();
