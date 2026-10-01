@@ -117,9 +117,9 @@ public class SerialManager : MonoBehaviour
             {
                 //TODO
                 return;
-                if (Registration.Instance.waitingForEndButton)
+                if (GameUI.Instance.waitingForEndButton)
                 {
-                    Registration.Instance?.OnEnd();
+                    GameUI.Instance?.OnEnd();
                     GameManager.Instance?.GameOver("GAME CANCELED");
                 }
             }

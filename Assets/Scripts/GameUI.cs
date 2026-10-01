@@ -6,9 +6,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Registration : MonoBehaviour
+public class GameUI : MonoBehaviour
 {
-    public static Registration Instance;
+    public static GameUI Instance;
 
     private enum PageState
     {
@@ -44,6 +44,9 @@ public class Registration : MonoBehaviour
     [Header("Validation")]
     [SerializeField] private float shakeStrength = 10f;
     [SerializeField] private float shakeDuration = 0.3f;
+
+    [Header("Registration")]
+    [SerializeField] private bool skipRegistration;
 
 
     private PageState currentState = PageState.Page1;
@@ -256,6 +259,9 @@ public class Registration : MonoBehaviour
 
     private void ShowPage(PageState state)
     {
+        if (skipRegistration && state == PageState.Page2)
+            state = PageState.Page3;
+
         currentState = state;
 
         for (int i = 0; i < pages.Count; i++)

@@ -98,10 +98,10 @@ public class GameManager : MonoBehaviour
 
     internal void OnSTART()
     {
-        if (!isGameStarted && Registration.Instance.waitingForStartButton)
+        if (!isGameStarted && GameUI.Instance.waitingForStartButton)
         {
             StartGame();
-            Registration.Instance?.OnGameStarted();
+            GameUI.Instance?.OnGameStarted();
         }
     }
 
@@ -255,7 +255,7 @@ public class GameManager : MonoBehaviour
         }
         pacman.ResetState();
         pacman.movement.canMove = true;
-        Registration.Instance.waitingForEndButton = true;
+        GameUI.Instance.waitingForEndButton = true;
     }
 
     internal void GameOver(string gameoverText)
@@ -277,7 +277,7 @@ public class GameManager : MonoBehaviour
             SaveHighScore();
             UpdateHighScoreText();
         }
-        Registration.Instance?.OnEnd();
+        GameUI.Instance?.OnEnd();
 
         if (gameOverClip != null)
         {
