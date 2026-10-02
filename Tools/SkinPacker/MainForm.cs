@@ -14,7 +14,6 @@ sealed class MainForm : Form
     readonly TextBox ghost2 = Box("#E7C2F4");
     readonly TextBox ghost3 = Box("#FEA4C0");
     readonly TextBox ghost4 = Box("#F19884");
-    readonly TextBox ghost5 = Box("#FFFFFF");
     readonly TextBox logo = new TextBox();
     readonly TextBox pellet = new TextBox();
     readonly TextBox power0 = new TextBox();
@@ -22,60 +21,98 @@ sealed class MainForm : Form
     readonly TextBox power2 = new TextBox();
     readonly TextBox power3 = new TextBox();
     readonly TextBox pacman = new TextBox();
-    readonly Dictionary<TextBox, Panel> swatches = new();
+    readonly Dictionary<TextBox, Button> swatches = new();
     readonly Dictionary<TextBox, PictureBox> previews = new();
+    readonly GamePreview gamePreview = new();
 
     public MainForm(RSA rsa, string startupMessage)
     {
         this.rsa = rsa;
         Text = "Skin Packer";
         StartPosition = FormStartPosition.CenterScreen;
-        MinimumSize = new Size(860, 720);
-        Size = new Size(920, 820);
+        MinimumSize = new Size(1180, 760);
+        Size = new Size(1360, 920);
         Font = new Font("Segoe UI", 9f);
 
-        var root = new TableLayoutPanel
+        var split = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 4,
-            Padding = new Padding(16),
-            AutoScroll = true
+            ColumnCount = 2,
+            RowCount = 1,
+            Padding = new Padding(0),
+            Margin = new Padding(0)
         };
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 72));
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90));
+        split.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 480));
+        split.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        split.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        gamePreview.Dock = DockStyle.Fill;
+        gamePreview.Margin = new Padding(0);
 
-        int row = 0;
-        AddNote(root, ref row, "Keep this program and the keys folder. Ship only the game exe and skin.pack.");
-        AddColor(root, ref row, "Text color 1", textPrimary);
-        AddColor(root, ref row, "Text color 2", textSecondary);
-        AddColor(root, ref row, "Wall color", wall);
-        AddColor(root, ref row, "Blinky", ghost1);
-        AddColor(root, ref row, "Pinky", ghost2);
-        AddColor(root, ref row, "Inky", ghost3);
-        AddColor(root, ref row, "Clyde", ghost4);
-        AddColor(root, ref row, "Ghost 5", ghost5);
-        AddFile(root, ref row, "Client logo", logo);
-        AddFile(root, ref row, "Pellet", pellet);
-        AddFile(root, ref row, "Collectable 1", power0);
-        AddFile(root, ref row, "Collectable 2", power1);
-        AddFile(root, ref row, "Collectable 3", power2);
-        AddFile(root, ref row, "Collectable 4", power3);
-        AddFile(root, ref row, "Pac-Man", pacman);
-
-        var buttons = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0, 12, 0, 0) };
-        var open = new Button { Text = "Open skin.pack", AutoSize = true, Padding = new Padding(8, 4, 8, 4), Margin = new Padding(0, 0, 8, 0) };
-        var export = new Button { Text = "Export skin.pack", AutoSize = true, Padding = new Padding(8, 4, 8, 4) };
+        var right = new Panel { Dock = DockStyle.Fill, Padding = new Padding(16, 12, 16, 12) };
+        var buttons = new TableLayoutPanel
+        {
+            Dock = DockStyle.Bottom,
+            Height = 44,
+            ColumnCount = 2,
+            RowCount = 1,
+            Margin = new Padding(0),
+            Padding = new Padding(0, 8, 0, 0)
+        };
+        buttons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        buttons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        var open = new Button { Text = "Open", Dock = DockStyle.Fill, Margin = new Padding(0, 0, 6, 0) };
+        var export = new Button { Text = "Export", Dock = DockStyle.Fill, Margin = new Padding(6, 0, 0, 0) };
         open.Click += (_, __) => OpenPack();
         export.Click += (_, __) => ExportPack();
-        buttons.Controls.Add(open);
-        buttons.Controls.Add(export);
-        root.Controls.Add(buttons, 0, row);
-        root.SetColumnSpan(buttons, 4);
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        buttons.Controls.Add(open, 0, 0);
+        buttons.Controls.Add(export, 1, 0);
 
-        Controls.Add(root);
+        var scroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
+        var stack = new TableLayoutPanel
+        {
+            ColumnCount = 1,
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Margin = new Padding(0)
+        };
+        stack.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        stack.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        stack.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        stack.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        stack.Controls.Add(Grid(3,
+            ColorCard("Text color 1", textPrimary),
+            ColorCard("Text color 2", textSecondary),
+            ColorCard("Wall color", wall)), 0, 0);
+        stack.Controls.Add(Grid(4,
+            ColorCard("Ghost 1", ghost1),
+            ColorCard("Ghost 2", ghost2),
+            ColorCard("Ghost 3", ghost3),
+            ColorCard("Ghost 4", ghost4)), 0, 1);
+        stack.Controls.Add(Grid(3,
+            FileCard("Client logo", logo),
+            FileCard("Pellet", pellet),
+            FileCard("Pac-Man", pacman)), 0, 2);
+        stack.Controls.Add(Grid(4,
+            FileCard("Collectable 1", power0),
+            FileCard("Collectable 2", power1),
+            FileCard("Collectable 3", power2),
+            FileCard("Collectable 4", power3)), 0, 3);
+        scroll.Controls.Add(stack);
+        scroll.Resize += (_, __) => stack.Width = Math.Max(320, scroll.ClientSize.Width - 4);
+
+        right.Controls.Add(scroll);
+        right.Controls.Add(buttons);
+        split.Controls.Add(gamePreview, 0, 0);
+        split.Controls.Add(right, 1, 0);
+        split.Resize += (_, __) =>
+        {
+            int height = split.ClientSize.Height;
+            if (height > 0)
+                split.ColumnStyles[0].Width = (int)Math.Round(height * 1080.0 / 1920.0);
+        };
+        Controls.Add(split);
+        RefreshGame();
 
         if (!string.IsNullOrEmpty(startupMessage))
             Shown += (_, __) => MessageBox.Show(this, startupMessage, "Skin Packer");
@@ -86,70 +123,109 @@ sealed class MainForm : Form
         return new TextBox { Text = hex, Anchor = AnchorStyles.Left | AnchorStyles.Right };
     }
 
-    void AddNote(TableLayoutPanel table, ref int row, string text)
+    static TableLayoutPanel Grid(int columns, params Control[] cells)
     {
-        var label = new Label { Text = text, AutoSize = true, MaximumSize = new Size(740, 0), Margin = new Padding(0, 0, 0, 12) };
-        table.Controls.Add(label, 0, row);
-        table.SetColumnSpan(label, 4);
-        table.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        row++;
-    }
-
-    void AddColor(TableLayoutPanel table, ref int row, string name, TextBox box)
-    {
-        table.Controls.Add(new Label { Text = name, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 8, 8, 4) }, 0, row);
-        var swatch = new Panel
+        int rows = (cells.Length + columns - 1) / columns;
+        var grid = new TableLayoutPanel
         {
-            Size = new Size(48, 28),
-            Margin = new Padding(0, 6, 8, 4),
-            BorderStyle = BorderStyle.FixedSingle
+            ColumnCount = columns,
+            RowCount = rows,
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Margin = new Padding(0, 0, 0, 22)
         };
-        swatches.Add(box, swatch);
-        table.Controls.Add(swatch, 1, row);
-        box.Margin = new Padding(0, 4, 8, 4);
-        box.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-        box.TextChanged += (_, __) => RefreshSwatch(box);
-        table.Controls.Add(box, 2, row);
-        var pick = new Button { Text = "Pick", AutoSize = true, Margin = new Padding(0, 4, 0, 4) };
-        pick.Click += (_, __) => PickColor(box);
-        table.Controls.Add(pick, 3, row);
-        table.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        RefreshSwatch(box);
-        row++;
+        for (int i = 0; i < columns; i++)
+            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / columns));
+        for (int i = 0; i < rows; i++)
+            grid.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        for (int i = 0; i < cells.Length; i++)
+            grid.Controls.Add(cells[i], i % columns, i / columns);
+        return grid;
     }
 
-    void AddFile(TableLayoutPanel table, ref int row, string name, TextBox box)
+    Control ColorCard(string name, TextBox box)
     {
-        table.Controls.Add(new Label { Text = name, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 18, 8, 4) }, 0, row);
+        var card = new TableLayoutPanel
+        {
+            ColumnCount = 1,
+            RowCount = 3,
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            Margin = new Padding(6, 12, 6, 12)
+        };
+        card.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        card.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
+        card.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        card.Controls.Add(new Label { Text = name, AutoSize = true, Dock = DockStyle.Fill, Margin = new Padding(0, 0, 0, 6) }, 0, 0);
+
+        var pick = new Button
+        {
+            Dock = DockStyle.Fill,
+            Margin = new Padding(0, 4, 0, 6),
+            FlatStyle = FlatStyle.Flat,
+            UseVisualStyleBackColor = false
+        };
+        pick.FlatAppearance.BorderColor = Color.FromArgb(90, 90, 90);
+        pick.Click += (_, __) => PickColor(box);
+        swatches.Add(box, pick);
+        card.Controls.Add(pick, 0, 1);
+
+        box.Dock = DockStyle.Fill;
+        box.Margin = new Padding(0, 4, 0, 0);
+        box.TextChanged += (_, __) => RefreshSwatch(box);
+        card.Controls.Add(box, 0, 2);
+        RefreshSwatch(box);
+        return card;
+    }
+
+    Control FileCard(string name, TextBox box)
+    {
+        var card = new TableLayoutPanel
+        {
+            ColumnCount = 1,
+            RowCount = 4,
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            Margin = new Padding(6, 12, 6, 12)
+        };
+        card.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        card.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
+        card.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
+        card.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        card.Controls.Add(new Label { Text = name, AutoSize = true, Dock = DockStyle.Fill }, 0, 0);
         var preview = new PictureBox
         {
-            Size = new Size(64, 64),
-            Margin = new Padding(0, 4, 8, 4),
+            Dock = DockStyle.Fill,
+            Margin = new Padding(0, 4, 0, 4),
             BorderStyle = BorderStyle.FixedSingle,
             SizeMode = PictureBoxSizeMode.Zoom,
             BackColor = Color.FromArgb(32, 32, 32)
         };
         previews.Add(box, preview);
-        table.Controls.Add(preview, 1, row);
-        box.ReadOnly = true;
-        box.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-        box.Margin = new Padding(0, 18, 8, 4);
-        box.TextChanged += (_, __) => RefreshPreview(box);
-        table.Controls.Add(box, 2, row);
-        var browse = new Button { Text = "Browse", AutoSize = true, Margin = new Padding(0, 16, 0, 4) };
+        card.Controls.Add(preview, 0, 1);
+        var browse = new Button { Text = "Browse", Dock = DockStyle.Fill, Margin = new Padding(0, 0, 0, 4) };
         browse.Click += (_, __) => Browse(box);
-        table.Controls.Add(browse, 3, row);
-        table.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        row++;
+        card.Controls.Add(browse, 0, 2);
+        box.ReadOnly = true;
+        box.Dock = DockStyle.Fill;
+        box.Margin = new Padding(0);
+        box.TextChanged += (_, __) => RefreshPreview(box);
+        card.Controls.Add(box, 0, 3);
+        return card;
     }
 
     void RefreshSwatch(TextBox box)
     {
-        if (!swatches.TryGetValue(box, out Panel swatch))
+        if (!swatches.TryGetValue(box, out Button swatch))
             return;
-        swatch.BackColor = TryHex(box.Text, out string hex)
+        Color color = TryHex(box.Text, out string hex)
             ? ColorTranslator.FromHtml(hex)
             : SystemColors.Control;
+        swatch.Text = string.IsNullOrEmpty(hex) ? box.Text : hex;
+        swatch.BackColor = color;
+        swatch.ForeColor = color.R * 0.299f + color.G * 0.587f + color.B * 0.114f > 150f ? Color.Black : Color.White;
+        RefreshGame();
     }
 
     void RefreshPreview(TextBox box)
@@ -160,19 +236,54 @@ sealed class MainForm : Form
         preview.Image = null;
         previous?.Dispose();
         if (string.IsNullOrWhiteSpace(box.Text) || !File.Exists(box.Text))
+        {
+            RefreshGame();
             return;
+        }
 
         byte[] bytes = File.ReadAllBytes(box.Text);
         using var stream = new MemoryStream(bytes);
         using Image loaded = Image.FromStream(stream);
         preview.Image = new Bitmap(loaded);
+        RefreshGame();
+    }
+
+    void RefreshGame()
+    {
+        if (!IsHandleCreated && gamePreview.Parent == null)
+            return;
+
+        gamePreview.Show(new SkinLook
+        {
+            TextPrimary = ColorOrDefault(textPrimary.Text, "#E40A6D"),
+            TextSecondary = ColorOrDefault(textSecondary.Text, "#0099C4"),
+            Wall = ColorOrDefault(wall.Text, "#FFFFFF"),
+            Ghosts = new[]
+            {
+                ColorOrDefault(ghost1.Text, "#F65285"),
+                ColorOrDefault(ghost2.Text, "#E7C2F4"),
+                ColorOrDefault(ghost3.Text, "#FEA4C0"),
+                ColorOrDefault(ghost4.Text, "#F19884")
+            },
+            Logo = logo.Text,
+            Pellet = pellet.Text,
+            Powers = new[] { power0.Text, power1.Text, power2.Text, power3.Text },
+            Pacman = pacman.Text
+        });
+    }
+
+    static Color ColorOrDefault(string text, string fallback)
+    {
+        if (!TryHex(text, out string hex))
+            hex = fallback;
+        return ColorTranslator.FromHtml(hex);
     }
 
     void OpenPack()
     {
         using var dialog = new OpenFileDialog();
-        dialog.Filter = "Skin pack (*.pack)|*.pack";
-        dialog.FileName = "skin.pack";
+        dialog.Filter = "Data (*.bin)|*.bin";
+        dialog.FileName = "data.bin";
         string root = KeyStore.FindProjectRoot();
         if (root != null)
             dialog.InitialDirectory = root;
@@ -207,7 +318,7 @@ sealed class MainForm : Form
         SetHex(wall, root, "wall");
         if (!root.TryGetProperty("ghosts", out JsonElement ghosts))
             return;
-        TextBox[] boxes = { ghost1, ghost2, ghost3, ghost4, ghost5 };
+        TextBox[] boxes = { ghost1, ghost2, ghost3, ghost4 };
         for (int i = 0; i < boxes.Length && i < ghosts.GetArrayLength(); i++)
             boxes[i].Text = ghosts[i].GetString();
     }
@@ -263,8 +374,7 @@ sealed class MainForm : Form
             || !TryHex(ghost1.Text, out string g1)
             || !TryHex(ghost2.Text, out string g2)
             || !TryHex(ghost3.Text, out string g3)
-            || !TryHex(ghost4.Text, out string g4)
-            || !TryHex(ghost5.Text, out string g5))
+            || !TryHex(ghost4.Text, out string g4))
         {
             MessageBox.Show(this, "Enter each color as #RRGGBB.", "Skin Packer");
             return;
@@ -282,12 +392,12 @@ sealed class MainForm : Form
         string json = "{\"textPrimary\":\"" + primary
             + "\",\"textSecondary\":\"" + secondary
             + "\",\"wall\":\"" + wallHex
-            + "\",\"ghosts\":[\"" + g1 + "\",\"" + g2 + "\",\"" + g3 + "\",\"" + g4 + "\",\"" + g5 + "\"]}";
+            + "\",\"ghosts\":[\"" + g1 + "\",\"" + g2 + "\",\"" + g3 + "\",\"" + g4 + "\"]}";
         entries.Add(("colors", Encoding.UTF8.GetBytes(json)));
 
         using var dialog = new SaveFileDialog();
-        dialog.Filter = "Skin pack (*.pack)|*.pack";
-        dialog.FileName = "skin.pack";
+        dialog.Filter = "Data (*.bin)|*.bin";
+        dialog.FileName = "data.bin";
         string root = KeyStore.FindProjectRoot();
         if (root != null)
             dialog.InitialDirectory = root;

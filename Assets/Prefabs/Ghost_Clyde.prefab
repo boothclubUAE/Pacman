@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1631421945586648450, guid: 2fde9760580df734b965459e729d1aba, type: 3}
@@ -64,43 +65,43 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1340345220604751223}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesUp.Array.data[0]
+      propertyPath: 'spritesUp.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: 9e643997e445a9a438b86e33c03ff5fc, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesUp.Array.data[1]
+      propertyPath: 'spritesUp.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: 73c7bb02c26d2d940a45ddf8d94746d8, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesDown.Array.data[0]
+      propertyPath: 'spritesDown.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: 15e8b14c2ee49a8478475248dea533da, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesDown.Array.data[1]
+      propertyPath: 'spritesDown.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: 889d73ecd0ce8ab43a64b193bb1f481f, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesLeft.Array.data[0]
+      propertyPath: 'spritesLeft.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: b6504fb61960e7048b072f164401642e, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesLeft.Array.data[1]
+      propertyPath: 'spritesLeft.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: 7c8147ebb7a5d2f48baa189591eb6ae0, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesRight.Array.data[0]
+      propertyPath: 'spritesRight.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: d29165f4227085a48b1e117e108c37d2, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesRight.Array.data[1]
+      propertyPath: 'spritesRight.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: 4ade5dd849e2b0840bc6327797cb4f2d, type: 3}
     - target: {fileID: 3259707676119580886, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: animationSprites.Array.data[0]
+      propertyPath: 'animationSprites.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: d29165f4227085a48b1e117e108c37d2, type: 3}
     - target: {fileID: 3259707676119580886, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: animationSprites.Array.data[1]
+      propertyPath: 'animationSprites.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: 4ade5dd849e2b0840bc6327797cb4f2d, type: 3}
     - target: {fileID: 3259707676119580887, guid: 2fde9760580df734b965459e729d1aba, type: 3}
@@ -113,15 +114,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6337672407132840256, guid: 2fde9760580df734b965459e729d1aba, type: 3}
       propertyPath: m_Color.b
-      value: 0.33333334
+      value: 0.44313726
       objectReference: {fileID: 0}
     - target: {fileID: 6337672407132840256, guid: 2fde9760580df734b965459e729d1aba, type: 3}
       propertyPath: m_Color.g
-      value: 0.73333335
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6337672407132840256, guid: 2fde9760580df734b965459e729d1aba, type: 3}
       propertyPath: m_Color.r
-      value: 0.972549
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7118088223020557506, guid: 2fde9760580df734b965459e729d1aba, type: 3}
       propertyPath: m_Sprite
@@ -132,6 +133,9 @@ PrefabInstance:
       value: 16
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2fde9760580df734b965459e729d1aba, type: 3}
 --- !u!114 &1340345220604751223 stripped
 MonoBehaviour:

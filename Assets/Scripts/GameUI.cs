@@ -53,6 +53,8 @@ public class GameUI : MonoBehaviour
     private TMP_InputField activeInput;
     internal bool waitingForStartButton;
     internal bool waitingForEndButton;
+    private TMP_Text touchToStartText;
+    private Tween touchToStartTween;
 
     private class KeyBinding
     {
@@ -269,10 +271,55 @@ public class GameUI : MonoBehaviour
             pages[i].SetActive(i == (int)state);
         }
 
+        if (state == PageState.Page1)
+            StartTouchToStartFlash();
+        else
+            StopTouchToStartFlash();
+
         if (state == PageState.Page3)
         {
             waitingForStartButton = true;
         }
+    }
+
+    private void StartTouchToStartFlash()
+    {
+        if (touchToStartText == null && page1 != null)
+        {
+            Transform found = page1.transform.Find("Touch to start");
+            if (found != null)
+                touchToStartText = found.GetComponent<TMP_Text>();
+        }
+        if (touchToStartText == null)
+            return;
+
+        StopTouchToStartFlash();
+        touchToStartTween = DOTween.Sequence()
+            .AppendInterval(0.55f)
+            .Append(touchToStartText.DOFade(0f, 0.12f))
+            .AppendInterval(0.28f)
+            .Append(touchToStartText.DOFade(1f, 0.12f))
+            .SetLoops(-1)
+            .SetUpdate(true);
+    }
+
+    private void StopTouchToStartFlash()
+    {
+        if (touchToStartTween != null)
+        {
+            touchToStartTween.Kill();
+            touchToStartTween = null;
+        }
+        if (touchToStartText == null)
+            return;
+        Color color = touchToStartText.color;
+        color.a = 1f;
+        touchToStartText.color = color;
+    }
+
+    private void OnDestroy()
+    {
+        StopTouchToStartFlash();
     }
 
     private void BuildPageList()

@@ -63,17 +63,8 @@ public static class SkinApplier
             return;
         appliedKey = key;
 
-        string folder = Directory.GetParent(Application.dataPath).FullName;
-        string path = Path.Combine(folder, "skin.pack");
-        if (!File.Exists(path))
+        if (!TryLoadPack(out Dictionary<string, byte[]> entries))
             return;
-
-        byte[] file = File.ReadAllBytes(path);
-        if (!SkinFile.TryRead(file, out Dictionary<string, byte[]> entries))
-        {
-            Debug.LogWarning("Rejected skin.pack. This build only accepts a pack signed for it.");
-            return;
-        }
 
         var previous = alive.ToArray();
         alive.Clear();
@@ -92,7 +83,27 @@ public static class SkinApplier
         }
     }
 
-    static void ApplyColors(Scene scene, string json)
+    // A pack next to the exe wins. Otherwise the copy shipped in StreamingAssets is the default.
+    static bool TryLoadPack(out Dictionary<string, byte[]> entries)
+    {
+        entries = null;
+        string external = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "data.bin");
+        if (File.Exists(external))
+        {
+            if (SkinFile.TryRead(File.ReadAllBytes(external), out entries))
+                return true;
+            Debug.LogWarning("Rejected data.bin.");
+        }
+
+        string bundled = Path.Combine(Application.streamingAssetsPath, "data.bin");
+        if (File.Exists(bundled) && SkinFile.TryRead(File.ReadAllBytes(bundled), out entries))
+            return true;
+
+        entries = null;
+        return false;
+    }
+
+    public static void ApplyColors(Scene scene, string json)
     {
         SkinColorSet colors = JsonUtility.FromJson<SkinColorSet>(json);
         if (colors == null)
@@ -131,29 +142,18 @@ public static class SkinApplier
             return;
 
         var named = new Dictionary<int, Ghost>();
-        var extras = new List<Ghost>();
         foreach (var ghost in Objects<Ghost>(scene))
         {
             int slot = GhostSlot(ghost);
-            if (slot >= 0)
-            {
-                if (!named.ContainsKey(slot))
-                    named.Add(slot, ghost);
-            }
-            else
-            {
-                extras.Add(ghost);
-            }
+            if (slot >= 0 && !named.ContainsKey(slot))
+                named.Add(slot, ghost);
         }
 
-        extras.Sort((a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
         for (int i = 0; i < 4; i++)
         {
             if (named.TryGetValue(i, out Ghost ghost))
                 TintGhost(ghost, colors.ghosts, i);
         }
-        for (int i = 0; i < extras.Count; i++)
-            TintGhost(extras[i], colors.ghosts, 4 + i);
     }
 
     static void TintGhost(Ghost ghost, string[] colors, int slot)
@@ -191,7 +191,7 @@ public static class SkinApplier
 
         foreach (var image in Objects<Image>(scene))
         {
-            if (image.gameObject.name != "Client Logo")
+            if (!IsClientLogo(image.gameObject.name))
                 continue;
             image.sprite = sprite;
             image.preserveAspect = true;
@@ -245,9 +245,13 @@ public static class SkinApplier
             string key = "power" + index;
             if (!entries.TryGetValue(key, out byte[] png))
                 continue;
+            // Keep the scale already on the icon. These images also drive the maze pellets,
+            // which are imported much larger than 100 pixels per unit, and the layout group
+            // sizes the icons from that value.
+            float ppu = image.sprite != null ? image.sprite.pixelsPerUnit : 100f;
             if (!sprites.TryGetValue(index, out Sprite sprite))
             {
-                sprite = LoadSprite(png, 100f);
+                sprite = LoadSprite(png, ppu);
                 sprites.Add(index, sprite);
             }
             if (sprite == null)
@@ -255,6 +259,11 @@ public static class SkinApplier
             image.sprite = sprite;
             image.preserveAspect = true;
         }
+    }
+
+    static bool IsClientLogo(string name)
+    {
+        return name == "Client Logo" || name == "ClientLogo";
     }
 
     static void AssignSprite(Component owner, Sprite sprite)

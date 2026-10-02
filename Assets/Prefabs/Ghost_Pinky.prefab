@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1631421945586648450, guid: 2fde9760580df734b965459e729d1aba, type: 3}
@@ -60,35 +61,35 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4988485570163000569}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesUp.Array.data[0]
+      propertyPath: 'spritesUp.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: 0d16b1529051f974183eb0aef20c3fef, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesUp.Array.data[1]
+      propertyPath: 'spritesUp.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: cad7e35b3d70a81499afbacf7490bef2, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesDown.Array.data[0]
+      propertyPath: 'spritesDown.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: a08760c905ba1ab46b718ab54e94fdcc, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesDown.Array.data[1]
+      propertyPath: 'spritesDown.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: 508edf19909d1664295a1cc8adf396f6, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesLeft.Array.data[0]
+      propertyPath: 'spritesLeft.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: 3d61af837289a7d43a1efdb063c7b17f, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesLeft.Array.data[1]
+      propertyPath: 'spritesLeft.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: ad2c91070caac5f42af69c5373db9b35, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesRight.Array.data[0]
+      propertyPath: 'spritesRight.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: f5d5cb4fd17bfd54ba600140ae959812, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: spritesRight.Array.data[1]
+      propertyPath: 'spritesRight.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: 7cd2cf6d53534ca4a9b21efe8504c5aa, type: 3}
     - target: {fileID: 3259707676119580883, guid: 2fde9760580df734b965459e729d1aba, type: 3}
@@ -96,11 +97,11 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3259707676119580886, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: animationSprites.Array.data[0]
+      propertyPath: 'animationSprites.Array.data[0]'
       value: 
       objectReference: {fileID: 21300000, guid: f5d5cb4fd17bfd54ba600140ae959812, type: 3}
     - target: {fileID: 3259707676119580886, guid: 2fde9760580df734b965459e729d1aba, type: 3}
-      propertyPath: animationSprites.Array.data[1]
+      propertyPath: 'animationSprites.Array.data[1]'
       value: 
       objectReference: {fileID: 21300000, guid: 7cd2cf6d53534ca4a9b21efe8504c5aa, type: 3}
     - target: {fileID: 3259707676119580887, guid: 2fde9760580df734b965459e729d1aba, type: 3}
@@ -112,12 +113,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6337672407132840256, guid: 2fde9760580df734b965459e729d1aba, type: 3}
+      propertyPath: m_Color.b
+      value: 0.019607844
+      objectReference: {fileID: 0}
+    - target: {fileID: 6337672407132840256, guid: 2fde9760580df734b965459e729d1aba, type: 3}
       propertyPath: m_Color.g
-      value: 0.70980394
+      value: 0.654902
       objectReference: {fileID: 0}
     - target: {fileID: 6337672407132840256, guid: 2fde9760580df734b965459e729d1aba, type: 3}
       propertyPath: m_Color.r
-      value: 0.9882353
+      value: 0.32156864
       objectReference: {fileID: 0}
     - target: {fileID: 7118088223020557506, guid: 2fde9760580df734b965459e729d1aba, type: 3}
       propertyPath: m_Sprite
@@ -128,6 +133,9 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2fde9760580df734b965459e729d1aba, type: 3}
 --- !u!114 &4988485570163000569 stripped
 MonoBehaviour:
