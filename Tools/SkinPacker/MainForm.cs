@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace SkinPacker;
 
@@ -21,24 +22,27 @@ sealed class MainForm : Form
     readonly TextBox power2 = new TextBox();
     readonly TextBox power3 = new TextBox();
     readonly TextBox pacman = new TextBox();
+    readonly Dictionary<TextBox, Panel> swatches = new();
+    readonly Dictionary<TextBox, PictureBox> previews = new();
 
     public MainForm(RSA rsa, string startupMessage)
     {
         this.rsa = rsa;
         Text = "Skin Packer";
         StartPosition = FormStartPosition.CenterScreen;
-        MinimumSize = new Size(760, 640);
-        Size = new Size(820, 720);
+        MinimumSize = new Size(860, 720);
+        Size = new Size(920, 820);
         Font = new Font("Segoe UI", 9f);
 
         var root = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 3,
+            ColumnCount = 4,
             Padding = new Padding(16),
             AutoScroll = true
         };
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 72));
         root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90));
 
@@ -54,16 +58,21 @@ sealed class MainForm : Form
         AddColor(root, ref row, "Ghost 5", ghost5);
         AddFile(root, ref row, "Client logo", logo);
         AddFile(root, ref row, "Pellet", pellet);
-        AddFile(root, ref row, "PowerPellet", power0);
-        AddFile(root, ref row, "PowerPellet 1", power1);
-        AddFile(root, ref row, "PowerPellet 2", power2);
-        AddFile(root, ref row, "PowerPellet 3", power3);
+        AddFile(root, ref row, "Collectable 1", power0);
+        AddFile(root, ref row, "Collectable 2", power1);
+        AddFile(root, ref row, "Collectable 3", power2);
+        AddFile(root, ref row, "Collectable 4", power3);
         AddFile(root, ref row, "Pac-Man", pacman);
 
+        var buttons = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0, 12, 0, 0) };
+        var open = new Button { Text = "Open skin.pack", AutoSize = true, Padding = new Padding(8, 4, 8, 4), Margin = new Padding(0, 0, 8, 0) };
         var export = new Button { Text = "Export skin.pack", AutoSize = true, Padding = new Padding(8, 4, 8, 4) };
+        open.Click += (_, __) => OpenPack();
         export.Click += (_, __) => ExportPack();
-        root.Controls.Add(export, 0, row);
-        root.SetColumnSpan(export, 3);
+        buttons.Controls.Add(open);
+        buttons.Controls.Add(export);
+        root.Controls.Add(buttons, 0, row);
+        root.SetColumnSpan(buttons, 4);
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
         Controls.Add(root);
@@ -81,7 +90,7 @@ sealed class MainForm : Form
     {
         var label = new Label { Text = text, AutoSize = true, MaximumSize = new Size(740, 0), Margin = new Padding(0, 0, 0, 12) };
         table.Controls.Add(label, 0, row);
-        table.SetColumnSpan(label, 3);
+        table.SetColumnSpan(label, 4);
         table.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         row++;
     }
@@ -89,27 +98,141 @@ sealed class MainForm : Form
     void AddColor(TableLayoutPanel table, ref int row, string name, TextBox box)
     {
         table.Controls.Add(new Label { Text = name, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 8, 8, 4) }, 0, row);
+        var swatch = new Panel
+        {
+            Size = new Size(48, 28),
+            Margin = new Padding(0, 6, 8, 4),
+            BorderStyle = BorderStyle.FixedSingle
+        };
+        swatches.Add(box, swatch);
+        table.Controls.Add(swatch, 1, row);
         box.Margin = new Padding(0, 4, 8, 4);
-        table.Controls.Add(box, 1, row);
+        box.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+        box.TextChanged += (_, __) => RefreshSwatch(box);
+        table.Controls.Add(box, 2, row);
         var pick = new Button { Text = "Pick", AutoSize = true, Margin = new Padding(0, 4, 0, 4) };
         pick.Click += (_, __) => PickColor(box);
-        table.Controls.Add(pick, 2, row);
+        table.Controls.Add(pick, 3, row);
         table.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        RefreshSwatch(box);
         row++;
     }
 
     void AddFile(TableLayoutPanel table, ref int row, string name, TextBox box)
     {
-        table.Controls.Add(new Label { Text = name, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 8, 8, 4) }, 0, row);
+        table.Controls.Add(new Label { Text = name, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 18, 8, 4) }, 0, row);
+        var preview = new PictureBox
+        {
+            Size = new Size(64, 64),
+            Margin = new Padding(0, 4, 8, 4),
+            BorderStyle = BorderStyle.FixedSingle,
+            SizeMode = PictureBoxSizeMode.Zoom,
+            BackColor = Color.FromArgb(32, 32, 32)
+        };
+        previews.Add(box, preview);
+        table.Controls.Add(preview, 1, row);
         box.ReadOnly = true;
         box.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-        box.Margin = new Padding(0, 4, 8, 4);
-        table.Controls.Add(box, 1, row);
-        var browse = new Button { Text = "Browse", AutoSize = true, Margin = new Padding(0, 4, 0, 4) };
+        box.Margin = new Padding(0, 18, 8, 4);
+        box.TextChanged += (_, __) => RefreshPreview(box);
+        table.Controls.Add(box, 2, row);
+        var browse = new Button { Text = "Browse", AutoSize = true, Margin = new Padding(0, 16, 0, 4) };
         browse.Click += (_, __) => Browse(box);
-        table.Controls.Add(browse, 2, row);
+        table.Controls.Add(browse, 3, row);
         table.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         row++;
+    }
+
+    void RefreshSwatch(TextBox box)
+    {
+        if (!swatches.TryGetValue(box, out Panel swatch))
+            return;
+        swatch.BackColor = TryHex(box.Text, out string hex)
+            ? ColorTranslator.FromHtml(hex)
+            : SystemColors.Control;
+    }
+
+    void RefreshPreview(TextBox box)
+    {
+        if (!previews.TryGetValue(box, out PictureBox preview))
+            return;
+        Image previous = preview.Image;
+        preview.Image = null;
+        previous?.Dispose();
+        if (string.IsNullOrWhiteSpace(box.Text) || !File.Exists(box.Text))
+            return;
+
+        byte[] bytes = File.ReadAllBytes(box.Text);
+        using var stream = new MemoryStream(bytes);
+        using Image loaded = Image.FromStream(stream);
+        preview.Image = new Bitmap(loaded);
+    }
+
+    void OpenPack()
+    {
+        using var dialog = new OpenFileDialog();
+        dialog.Filter = "Skin pack (*.pack)|*.pack";
+        dialog.FileName = "skin.pack";
+        string root = KeyStore.FindProjectRoot();
+        if (root != null)
+            dialog.InitialDirectory = root;
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+            return;
+
+        byte[] file = File.ReadAllBytes(dialog.FileName);
+        if (!PackFormat.TryRead(file, rsa, out Dictionary<string, byte[]> entries))
+        {
+            MessageBox.Show(this, "This pack could not be opened. It was not signed with this project's key.", "Skin Packer");
+            return;
+        }
+
+        if (entries.TryGetValue("colors", out byte[] colorBytes))
+            ApplyLoadedColors(Encoding.UTF8.GetString(colorBytes));
+
+        LoadImage(entries, "logo", logo);
+        LoadImage(entries, "pellet", pellet);
+        LoadImage(entries, "power0", power0);
+        LoadImage(entries, "power1", power1);
+        LoadImage(entries, "power2", power2);
+        LoadImage(entries, "power3", power3);
+        LoadImage(entries, "pacman", pacman);
+    }
+
+    void ApplyLoadedColors(string json)
+    {
+        using JsonDocument document = JsonDocument.Parse(json);
+        JsonElement root = document.RootElement;
+        SetHex(textPrimary, root, "textPrimary");
+        SetHex(textSecondary, root, "textSecondary");
+        SetHex(wall, root, "wall");
+        if (!root.TryGetProperty("ghosts", out JsonElement ghosts))
+            return;
+        TextBox[] boxes = { ghost1, ghost2, ghost3, ghost4, ghost5 };
+        for (int i = 0; i < boxes.Length && i < ghosts.GetArrayLength(); i++)
+            boxes[i].Text = ghosts[i].GetString();
+    }
+
+    static void SetHex(TextBox box, JsonElement root, string name)
+    {
+        if (root.TryGetProperty(name, out JsonElement value))
+            box.Text = value.GetString();
+    }
+
+    void LoadImage(Dictionary<string, byte[]> entries, string name, TextBox box)
+    {
+        if (!entries.TryGetValue(name, out byte[] data) || data == null || data.Length == 0)
+        {
+            box.Text = "";
+            return;
+        }
+
+        string folder = Path.Combine(Path.GetTempPath(), "SkinPacker");
+        Directory.CreateDirectory(folder);
+        string extension = data.Length > 3 && data[0] == 0xFF && data[1] == 0xD8 ? ".jpg" : ".png";
+        string path = Path.Combine(folder, name + extension);
+        File.WriteAllBytes(path, data);
+        box.Text = "";
+        box.Text = path;
     }
 
     static void PickColor(TextBox box)
@@ -172,7 +295,6 @@ sealed class MainForm : Form
             return;
 
         File.WriteAllBytes(dialog.FileName, PackFormat.Build(entries, rsa));
-        MessageBox.Show(this, "Wrote the skin pack. Put skin.pack in the same folder as the game exe. Do not send SkinPacker or the keys folder with that build.", "Skin Packer");
     }
 
     bool TryAddImage(List<(string Name, byte[] Data)> entries, string name, string path)

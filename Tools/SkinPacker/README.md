@@ -13,7 +13,7 @@ Skin Packer stays with you. A client build is the game exe plus one `skin.pack`.
 
 1. Open Skin Packer.
 2. Set the two text colors, the wall color, and the five ghost colors.
-3. Pick the client logo, pellet, four power pellets, and one Pac-Man image (PNG or JPG). Leave a file blank to keep the art already in the game. The logo is applied only to the object named Client Logo. BoothClub Logo is left alone.
+3. Pick the client logo, pellet, four collectables, and one Pac-Man image (PNG or JPG). Leave a file blank to keep the art already in the game. Open an existing skin.pack to change it. The logo is applied only to the object named Client Logo. BoothClub Logo is left alone.
 4. Pac-Man should be one filled shape facing right, with no mouth. The game cuts the chomp frames from it, uses the open-mouth frame as a still image on LivesIndicator, and shrinks that same image for the death sequence.
 5. Export `skin.pack` and put it in the same folder as `Pacman.exe`.
 

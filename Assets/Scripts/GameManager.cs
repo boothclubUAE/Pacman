@@ -113,6 +113,9 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        if (Application.isEditor && Input.GetKeyDown(KeyCode.Space))
+            OnSTART();
+
         if (showingGameOver)
             return;
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.L))
@@ -241,6 +244,7 @@ public class GameManager : MonoBehaviour
 
         // Start power-up challenge timer
         powerPelletsRemaining = 4;
+        RestoreCollectables();
         currentTimerValue = gameTime;
         isTimerRunning = true;
         UpdateTimerText();
@@ -466,7 +470,36 @@ public class GameManager : MonoBehaviour
     }
     private void DisablePowerup(int id)
     {
-        Powerups[id].CrossFadeAlpha(0.2f, 0.2f, true);
+        foreach (var icon in CollectableIcons(id))
+        {
+            Color color = icon.color;
+            color.a = 0.25f;
+            icon.color = color;
+        }
+    }
+
+    private void RestoreCollectables()
+    {
+        foreach (var icon in CollectableIcons(-1))
+        {
+            Color color = icon.color;
+            color.a = 1f;
+            icon.color = color;
+        }
+    }
+
+    private IEnumerable<Image> CollectableIcons(int siblingIndex)
+    {
+        Image[] images = FindObjectsByType<Image>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < images.Length; i++)
+        {
+            Transform parent = images[i].transform.parent;
+            if (parent == null || parent.name != "Collectables")
+                continue;
+            if (siblingIndex >= 0 && images[i].transform.GetSiblingIndex() != siblingIndex)
+                continue;
+            yield return images[i];
+        }
     }
 
     private bool HasRemainingPellets()

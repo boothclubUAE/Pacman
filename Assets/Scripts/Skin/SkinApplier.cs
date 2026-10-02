@@ -113,6 +113,13 @@ public static class SkinApplier
         {
             foreach (var text in Objects<TMP_Text>(scene))
             {
+                string objectName = text.gameObject.name;
+                if (hasSecondary && (objectName == "Timer" || objectName == "CollectablesText"))
+                {
+                    text.color = secondary;
+                    continue;
+                }
+
                 if (hasPrimary && IsPink(text.color))
                     text.color = primary;
                 else if (hasSecondary && IsBlue(text.color))
@@ -220,6 +227,33 @@ public static class SkinApplier
             }
             if (sprite != null)
                 AssignSprite(pellet, sprite);
+        }
+
+        ApplyCollectableIcons(scene, entries);
+    }
+
+    static void ApplyCollectableIcons(Scene scene, Dictionary<string, byte[]> entries)
+    {
+        var sprites = new Dictionary<int, Sprite>();
+        foreach (var image in Objects<Image>(scene))
+        {
+            Transform parent = image.transform.parent;
+            if (parent == null || parent.name != "Collectables")
+                continue;
+
+            int index = image.transform.GetSiblingIndex();
+            string key = "power" + index;
+            if (!entries.TryGetValue(key, out byte[] png))
+                continue;
+            if (!sprites.TryGetValue(index, out Sprite sprite))
+            {
+                sprite = LoadSprite(png, 100f);
+                sprites.Add(index, sprite);
+            }
+            if (sprite == null)
+                continue;
+            image.sprite = sprite;
+            image.preserveAspect = true;
         }
     }
 
