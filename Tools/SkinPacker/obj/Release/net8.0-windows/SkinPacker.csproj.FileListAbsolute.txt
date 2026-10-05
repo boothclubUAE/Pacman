@@ -1,0 +1,15 @@
+C:\Projects\Pacman\Tools\SkinPacker\bin\Release\net8.0-windows\SkinPacker.exe
+C:\Projects\Pacman\Tools\SkinPacker\bin\Release\net8.0-windows\SkinPacker.deps.json
+C:\Projects\Pacman\Tools\SkinPacker\bin\Release\net8.0-windows\SkinPacker.runtimeconfig.json
+C:\Projects\Pacman\Tools\SkinPacker\bin\Release\net8.0-windows\SkinPacker.dll
+C:\Projects\Pacman\Tools\SkinPacker\bin\Release\net8.0-windows\SkinPacker.pdb
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\SkinPacker.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\SkinPacker.AssemblyInfoInputs.cache
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\SkinPacker.AssemblyInfo.cs
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\SkinPacker.csproj.CoreCompileInputs.cache
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\SkinPacker.sourcelink.json
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\SkinPacker.dll
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\refint\SkinPacker.dll
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\SkinPacker.pdb
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\SkinPacker.genruntimeconfig.cache
+C:\Projects\Pacman\Tools\SkinPacker\obj\Release\net8.0-windows\ref\SkinPacker.dll
