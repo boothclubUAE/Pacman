@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "SkinPacker/1.0.0": {
+        "runtime": {
+          "SkinPacker.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SkinPacker/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
