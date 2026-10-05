@@ -214,22 +214,76 @@ public static class SkinApplier
             }
         }
 
-        var powerSprites = new Dictionary<int, Sprite>();
+        FitPowerPellets(scene, entries);
+
+        ApplyCollectableIcons(scene, entries);
+    }
+
+    // A tall collectable covers three pellet cells. The upper pair stays centered on its
+    // pellet. The lower pair keeps its bottom on that pellet and grows upward only.
+    static void FitPowerPellets(Scene scene, Dictionary<string, byte[]> entries)
+    {
+        var powers = new List<PowerPellet>();
         foreach (var pellet in Objects<PowerPellet>(scene))
+            powers.Add(pellet);
+        powers.Sort((a, b) => b.transform.position.y.CompareTo(a.transform.position.y));
+        int topCount = powers.Count / 2;
+
+        for (int i = 0; i < powers.Count; i++)
         {
+            PowerPellet pellet = powers[i];
             string key = "power" + pellet.id;
             if (!entries.TryGetValue(key, out byte[] png))
                 continue;
-            if (!powerSprites.TryGetValue(pellet.id, out Sprite sprite))
-            {
-                sprite = LoadSprite(png, MatchingPpu(pellet.GetComponent<SpriteRenderer>(), png));
-                powerSprites.Add(pellet.id, sprite);
-            }
-            if (sprite != null)
-                AssignSprite(pellet, sprite);
-        }
 
-        ApplyCollectableIcons(scene, entries);
+            Texture2D texture = LoadTexture(png);
+            if (texture == null)
+                continue;
+            bool tall = texture.height > texture.width;
+            bool top = i < topCount;
+            // A little under a full cell so a wide picture does not cover the pellet beside it.
+            const float fit = 0.85f;
+            float world = (tall ? 3f : 1f) * fit;
+            float ppu = tall
+                ? texture.height / world
+                : Mathf.Max(texture.width, texture.height) / world;
+            Vector2 pivot = tall && !top ? new Vector2(0.5f, 0.5f / world) : new Vector2(0.5f, 0.5f);
+            UnityEngine.Object.Destroy(texture);
+
+            Sprite sprite = LoadSprite(png, ppu, pivot);
+            if (sprite == null)
+                continue;
+            AssignSprite(pellet, sprite);
+            if (tall)
+                ClearCoveredPellets(pellet, top);
+        }
+    }
+
+    static void ClearCoveredPellets(PowerPellet pellet, bool top)
+    {
+        Tilemap tilemap = pellet.GetComponentInParent<Tilemap>();
+        if (tilemap == null)
+            return;
+        Vector3Int cell = tilemap.WorldToCell(pellet.transform.position);
+        if (top)
+        {
+            ClearPellet(tilemap, cell + new Vector3Int(0, 1, 0));
+            ClearPellet(tilemap, cell + new Vector3Int(0, -1, 0));
+        }
+        else
+        {
+            ClearPellet(tilemap, cell + new Vector3Int(0, 1, 0));
+            ClearPellet(tilemap, cell + new Vector3Int(0, 2, 0));
+        }
+    }
+
+    static void ClearPellet(Tilemap tilemap, Vector3Int cell)
+    {
+        GameObject occupied = tilemap.GetInstantiatedObject(cell);
+        if (occupied != null && occupied.GetComponent<PowerPellet>() != null)
+            return;
+        if (tilemap.HasTile(cell))
+            tilemap.SetTile(cell, null);
     }
 
     static void ApplyCollectableIcons(Scene scene, Dictionary<string, byte[]> entries)
@@ -378,6 +432,11 @@ public static class SkinApplier
 
     static Sprite LoadSprite(byte[] png, float ppu)
     {
+        return LoadSprite(png, ppu, new Vector2(0.5f, 0.5f));
+    }
+
+    static Sprite LoadSprite(byte[] png, float ppu, Vector2 pivot)
+    {
         Texture2D texture = LoadTexture(png);
         if (texture == null)
             return null;
@@ -385,7 +444,7 @@ public static class SkinApplier
         var sprite = Sprite.Create(
             texture,
             new Rect(0f, 0f, texture.width, texture.height),
-            new Vector2(0.5f, 0.5f),
+            pivot,
             ppu,
             0,
             SpriteMeshType.FullRect);

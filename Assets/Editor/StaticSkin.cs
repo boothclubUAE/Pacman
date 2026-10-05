@@ -61,7 +61,7 @@ static class StaticSkin
             return;
 
         string hash = Hash(file);
-        if (hash == failedHash || hash == ReadStampHash())
+        if (hash == failedHash || (hash == ReadStampHash() && ReadStampValue(3) == "board4"))
             return;
 
         if (!SceneReady())
@@ -102,9 +102,16 @@ static class StaticSkin
             if (!entries.TryGetValue("power" + i, out byte[] png))
                 continue;
             string prefab = i == 0 ? "Assets/Prefabs/PowerPellet.prefab" : "Assets/Prefabs/PowerPellet " + i + ".prefab";
-            Sprite existing = PrefabSprite(prefab);
-            Sprite sprite = ImportSprite(Folder + "/item" + i + ".png", png, PixelsPerUnit(existing, png, 24f));
-            AssignPrefabSprite(prefab, sprite, singleFrame: true);
+            PngSize(png, out int width, out int height);
+            bool tall = height > width;
+            bool top = i < 2;
+            const float fit = 0.85f;
+            float world = (tall ? 3f : 1f) * fit;
+            float boardPpu = tall ? height / world : Mathf.Max(width, height) / world;
+            Vector2 pivot = tall && !top ? new Vector2(0.5f, 0.5f / world) : new Vector2(0.5f, 0.5f);
+            ImportSprite(Folder + "/item" + i + ".png", png, width > 0 ? width : 100f);
+            Sprite board = ImportSprite(Folder + "/board" + i + ".png", png, boardPpu, pivot);
+            AssignPrefabSprite(prefab, board, singleFrame: true);
         }
 
         if (entries.TryGetValue("pacman", out byte[] pacmanPng))
@@ -350,7 +357,27 @@ static class StaticSkin
         return renderer != null ? renderer.sprite : null;
     }
 
+    static void PngSize(byte[] png, out int width, out int height)
+    {
+        width = 0;
+        height = 0;
+        var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+        if (!texture.LoadImage(png))
+        {
+            UnityEngine.Object.DestroyImmediate(texture);
+            return;
+        }
+        width = texture.width;
+        height = texture.height;
+        UnityEngine.Object.DestroyImmediate(texture);
+    }
+
     static Sprite ImportSprite(string assetPath, byte[] png, float ppu)
+    {
+        return ImportSprite(assetPath, png, ppu, new Vector2(0.5f, 0.5f));
+    }
+
+    static Sprite ImportSprite(string assetPath, byte[] png, float ppu, Vector2 pivot)
     {
         string full = Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath));
         File.WriteAllBytes(full, png);
@@ -368,7 +395,13 @@ static class StaticSkin
         var settings = new TextureImporterSettings();
         importer.ReadTextureSettings(settings);
         settings.spriteMeshType = SpriteMeshType.FullRect;
-        settings.spriteAlignment = (int)SpriteAlignment.Center;
+        if (pivot == new Vector2(0.5f, 0.5f))
+            settings.spriteAlignment = (int)SpriteAlignment.Center;
+        else
+        {
+            settings.spriteAlignment = (int)SpriteAlignment.Custom;
+            settings.spritePivot = pivot;
+        }
         importer.SetTextureSettings(settings);
         importer.SaveAndReimport();
         return AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
@@ -454,7 +487,7 @@ static class StaticSkin
                 secondary = colors.textSecondary ?? "";
             }
         }
-        File.WriteAllText(StampPath(), hash + "\n" + primary + "\n" + secondary + "\n");
+        File.WriteAllText(StampPath(), hash + "\n" + primary + "\n" + secondary + "\nboard4\n");
         AssetDatabase.ImportAsset(Folder + "/stamp.txt");
     }
 
