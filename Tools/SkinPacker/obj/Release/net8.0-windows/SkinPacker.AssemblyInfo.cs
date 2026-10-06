@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SkinPacker")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+69a9d77b1f3fa23f71b20695959bcd6fda87097e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dbcffee171bba11f8831f625c0e96043f3624d9f")]
 [assembly: System.Reflection.AssemblyProductAttribute("SkinPacker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SkinPacker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

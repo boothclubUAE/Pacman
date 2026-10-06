@@ -109,6 +109,17 @@ public static class SkinApplier
         if (colors == null)
             return;
 
+        if (TryParse(colors.background, out Color background))
+        {
+            foreach (var camera in Objects<Camera>(scene))
+            {
+                if (camera.gameObject.name != "Main Camera")
+                    continue;
+                camera.clearFlags = CameraClearFlags.SolidColor;
+                camera.backgroundColor = background;
+            }
+        }
+
         if (TryParse(colors.wall, out Color wall))
         {
             foreach (var tilemap in Objects<Tilemap>(scene))
@@ -524,6 +535,7 @@ public static class SkinApplier
         public string textPrimary;
         public string textSecondary;
         public string wall;
+        public string background;
         public string[] ghosts;
     }
 }
