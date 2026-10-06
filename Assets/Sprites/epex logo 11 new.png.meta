@@ -1,0 +1,819 @@
+fileFormatVersion: 2
+guid: 8478db27e19300449b220634d64a2030
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6325939605530632313
+    second: epex logo 11 new_0
+  - first:
+      213: -1317828937235832813
+    second: epex logo 11 new_1
+  - first:
+      213: 525245582234624608
+    second: epex logo 11 new_2
+  - first:
+      213: 2285481011939929638
+    second: epex logo 11 new_3
+  - first:
+      213: 3422513687037278155
+    second: epex logo 11 new_4
+  - first:
+      213: -4050705515389418128
+    second: epex logo 11 new_5
+  - first:
+      213: -4949396402121986937
+    second: epex logo 11 new_6
+  - first:
+      213: 5096450894721615700
+    second: epex logo 11 new_7
+  - first:
+      213: 5633305071549212651
+    second: epex logo 11 new_8
+  - first:
+      213: -2263269358799468827
+    second: epex logo 11 new_9
+  - first:
+      213: 7834953826922700736
+    second: epex logo 11 new_10
+  - first:
+      213: -1737563198432501873
+    second: epex logo 11 new_11
+  - first:
+      213: 4703601975660762805
+    second: epex logo 11 new_12
+  - first:
+      213: 6454618611425925513
+    second: epex logo 11 new_13
+  - first:
+      213: -2121649594998600911
+    second: epex logo 11 new_14
+  - first:
+      213: 2335855325144370600
+    second: epex logo 11 new_15
+  - first:
+      213: 7164573058781028805
+    second: epex logo 11 new_16
+  - first:
+      213: 6579091180318930654
+    second: epex logo 11 new_17
+  - first:
+      213: -7459576478353078322
+    second: epex logo 11 new_18
+  - first:
+      213: 8073001094777835956
+    second: epex logo 11 new_19
+  - first:
+      213: -316108877873172327
+    second: epex logo 11 new_20
+  - first:
+      213: -3983599604875953462
+    second: epex logo 11 new_21
+  - first:
+      213: 6845924113885271174
+    second: epex logo 11 new_22
+  - first:
+      213: 6047122511725156078
+    second: epex logo 11 new_23
+  - first:
+      213: -8930910455108690770
+    second: epex logo 11 new_24
+  - first:
+      213: -5684946503380973484
+    second: epex logo 11 new_25
+  - first:
+      213: -9167673827759140032
+    second: epex logo 11 new_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: epex logo 11 new_0
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 141
+        width: 163
+        height: 172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78f95cde17fb538a0800000000000000
+      internalID: -6325939605530632313
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_1
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 141
+        width: 178
+        height: 172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 310e351509126bde0800000000000000
+      internalID: -1317828937235832813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_2
+      rect:
+        serializedVersion: 2
+        x: 442
+        y: 141
+        width: 165
+        height: 172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06220fcf21c0a4700800000000000000
+      internalID: 525245582234624608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_3
+      rect:
+        serializedVersion: 2
+        x: 622
+        y: 141
+        width: 224
+        height: 172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62e64911fd8a7bf10800000000000000
+      internalID: 2285481011939929638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_4
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 36
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc7f4caa0163f7f20800000000000000
+      internalID: 3422513687037278155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_5
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 36
+        width: 31
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0758f799bc009c7c0800000000000000
+      internalID: -4050705515389418128
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_6
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 36
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78c2ceef136305bb0800000000000000
+      internalID: -4949396402121986937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_7
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 36
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4578a1b261b3ab640800000000000000
+      internalID: 5096450894721615700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_8
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 36
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be7e815bd158d2e40800000000000000
+      internalID: 5633305071549212651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_9
+      rect:
+        serializedVersion: 2
+        x: 229
+        y: 36
+        width: 7
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e64bbd62804790e0800000000000000
+      internalID: -2263269358799468827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_10
+      rect:
+        serializedVersion: 2
+        x: 246
+        y: 36
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cf90558ef85bbc60800000000000000
+      internalID: 7834953826922700736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_11
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 36
+        width: 27
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8f93ae1a7fe2e7e0800000000000000
+      internalID: -1737563198432501873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_12
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 36
+        width: 28
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b6d51c731d864140800000000000000
+      internalID: 4703601975660762805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_13
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 36
+        width: 7
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 989daa6dd69639950800000000000000
+      internalID: 6454618611425925513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_14
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 36
+        width: 32
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13bc1403fe26e82e0800000000000000
+      internalID: -2121649594998600911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_15
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 36
+        width: 22
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ad4fe5da00aa6020800000000000000
+      internalID: 2335855325144370600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_16
+      rect:
+        serializedVersion: 2
+        x: 447
+        y: 36
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c12af7cc3dad6360800000000000000
+      internalID: 7164573058781028805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_17
+      rect:
+        serializedVersion: 2
+        x: 481
+        y: 36
+        width: 22
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed6b0db2290ad4b50800000000000000
+      internalID: 6579091180318930654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_18
+      rect:
+        serializedVersion: 2
+        x: 507
+        y: 36
+        width: 32
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec7c7e827b24a7890800000000000000
+      internalID: -7459576478353078322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_19
+      rect:
+        serializedVersion: 2
+        x: 545
+        y: 36
+        width: 27
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b1929d19bf090070800000000000000
+      internalID: 8073001094777835956
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_20
+      rect:
+        serializedVersion: 2
+        x: 581
+        y: 36
+        width: 28
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 990b50086a4fc9bf0800000000000000
+      internalID: -316108877873172327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_21
+      rect:
+        serializedVersion: 2
+        x: 618
+        y: 36
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aca7bffe34967b8c0800000000000000
+      internalID: -3983599604875953462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_22
+      rect:
+        serializedVersion: 2
+        x: 652
+        y: 36
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6849967d5bb910f50800000000000000
+      internalID: 6845924113885271174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_23
+      rect:
+        serializedVersion: 2
+        x: 706
+        y: 36
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee655a8a2e1bbe350800000000000000
+      internalID: 6047122511725156078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_24
+      rect:
+        serializedVersion: 2
+        x: 737
+        y: 36
+        width: 31
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eac9c6252480f0480800000000000000
+      internalID: -8930910455108690770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_25
+      rect:
+        serializedVersion: 2
+        x: 775
+        y: 36
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 458c0ea76430b11b0800000000000000
+      internalID: -5684946503380973484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: epex logo 11 new_26
+      rect:
+        serializedVersion: 2
+        x: 807
+        y: 36
+        width: 33
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04355cfd931e5c080800000000000000
+      internalID: -9167673827759140032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      epex logo 11 new_0: -6325939605530632313
+      epex logo 11 new_1: -1317828937235832813
+      epex logo 11 new_10: 7834953826922700736
+      epex logo 11 new_11: -1737563198432501873
+      epex logo 11 new_12: 4703601975660762805
+      epex logo 11 new_13: 6454618611425925513
+      epex logo 11 new_14: -2121649594998600911
+      epex logo 11 new_15: 2335855325144370600
+      epex logo 11 new_16: 7164573058781028805
+      epex logo 11 new_17: 6579091180318930654
+      epex logo 11 new_18: -7459576478353078322
+      epex logo 11 new_19: 8073001094777835956
+      epex logo 11 new_2: 525245582234624608
+      epex logo 11 new_20: -316108877873172327
+      epex logo 11 new_21: -3983599604875953462
+      epex logo 11 new_22: 6845924113885271174
+      epex logo 11 new_23: 6047122511725156078
+      epex logo 11 new_24: -8930910455108690770
+      epex logo 11 new_25: -5684946503380973484
+      epex logo 11 new_26: -9167673827759140032
+      epex logo 11 new_3: 2285481011939929638
+      epex logo 11 new_4: 3422513687037278155
+      epex logo 11 new_5: -4050705515389418128
+      epex logo 11 new_6: -4949396402121986937
+      epex logo 11 new_7: 5096450894721615700
+      epex logo 11 new_8: 5633305071549212651
+      epex logo 11 new_9: -2263269358799468827
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

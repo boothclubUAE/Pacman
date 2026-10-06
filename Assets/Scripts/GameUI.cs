@@ -6,9 +6,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Registration : MonoBehaviour
+public class GameUI : MonoBehaviour
 {
-    public static Registration Instance;
+    public static GameUI Instance;
 
     private enum PageState
     {
@@ -45,11 +45,16 @@ public class Registration : MonoBehaviour
     [SerializeField] private float shakeStrength = 10f;
     [SerializeField] private float shakeDuration = 0.3f;
 
+    [Header("Registration")]
+    [SerializeField] private bool skipRegistration;
+
 
     private PageState currentState = PageState.Page1;
     private TMP_InputField activeInput;
     internal bool waitingForStartButton;
     internal bool waitingForEndButton;
+    private TMP_Text touchToStartText;
+    private Tween touchToStartTween;
 
     private class KeyBinding
     {
@@ -256,6 +261,9 @@ public class Registration : MonoBehaviour
 
     private void ShowPage(PageState state)
     {
+        if (skipRegistration && state == PageState.Page2)
+            state = PageState.Page3;
+
         currentState = state;
 
         for (int i = 0; i < pages.Count; i++)
@@ -263,10 +271,55 @@ public class Registration : MonoBehaviour
             pages[i].SetActive(i == (int)state);
         }
 
+        if (state == PageState.Page1)
+            StartTouchToStartFlash();
+        else
+            StopTouchToStartFlash();
+
         if (state == PageState.Page3)
         {
             waitingForStartButton = true;
         }
+    }
+
+    private void StartTouchToStartFlash()
+    {
+        if (touchToStartText == null && page1 != null)
+        {
+            Transform found = page1.transform.Find("Touch to start");
+            if (found != null)
+                touchToStartText = found.GetComponent<TMP_Text>();
+        }
+        if (touchToStartText == null)
+            return;
+
+        StopTouchToStartFlash();
+        touchToStartTween = DOTween.Sequence()
+            .AppendInterval(0.55f)
+            .Append(touchToStartText.DOFade(0f, 0.12f))
+            .AppendInterval(0.28f)
+            .Append(touchToStartText.DOFade(1f, 0.12f))
+            .SetLoops(-1)
+            .SetUpdate(true);
+    }
+
+    private void StopTouchToStartFlash()
+    {
+        if (touchToStartTween != null)
+        {
+            touchToStartTween.Kill();
+            touchToStartTween = null;
+        }
+        if (touchToStartText == null)
+            return;
+        Color color = touchToStartText.color;
+        color.a = 1f;
+        touchToStartText.color = color;
+    }
+
+    private void OnDestroy()
+    {
+        StopTouchToStartFlash();
     }
 
     private void BuildPageList()

@@ -1,10 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.IO.Ports;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.Events;
 
 [HasTabField]
 public class SerialManager : MonoBehaviour
@@ -15,7 +13,7 @@ public class SerialManager : MonoBehaviour
     [TabField] public int baudRate = 115200;
     [TabField] public int bufferTimeout = 1;
 
-    private SerialPort port;
+    private IntPtr port = IntPtr.Zero;
     private Thread readThread;
     private bool running;
 
@@ -48,24 +46,9 @@ public class SerialManager : MonoBehaviour
 
         try
         {
-            port = new SerialPort(portName, baudRate)
-            {
-                ReadTimeout = 500,
-                WriteTimeout = 500,
-                DtrEnable = true,
-                RtsEnable = true,
-                Handshake = Handshake.None,
-                Parity = Parity.None,
-                DataBits = 8,
-                StopBits = StopBits.One,
-                NewLine = "\n"
-            };
-
-            port.Open();
+            port = WinSerial.Open(portName, baudRate);
             Debug.Log("[Serial] Opened successfully");
-
-            port.DiscardInBuffer();
-            port.DiscardOutBuffer();
+            WinSerial.Discard(port);
 
             StartCoroutine(BufferWarmupThenStart());
         }
@@ -85,11 +68,8 @@ public class SerialManager : MonoBehaviour
             timer += Time.deltaTime;
             try
             {
-                if (port != null && port.IsOpen)
-                {
-                    port.DiscardInBuffer();
-                    port.DiscardOutBuffer();
-                }
+                if (port != IntPtr.Zero)
+                    WinSerial.Discard(port);
             }
             catch { }
 
@@ -117,9 +97,9 @@ public class SerialManager : MonoBehaviour
             {
                 //TODO
                 return;
-                if (Registration.Instance.waitingForEndButton)
+                if (GameUI.Instance.waitingForEndButton)
                 {
-                    Registration.Instance?.OnEnd();
+                    GameUI.Instance?.OnEnd();
                     GameManager.Instance?.GameOver("GAME CANCELED");
                 }
             }
@@ -136,7 +116,7 @@ public class SerialManager : MonoBehaviour
 
     private void Send(string message)
     {
-        if (port == null || !port.IsOpen)
+        if (port == IntPtr.Zero)
         {
             Debug.LogError("[Serial] Port not open");
             return;
@@ -144,8 +124,7 @@ public class SerialManager : MonoBehaviour
 
         try
         {
-            port.WriteLine(message);
-            port.BaseStream.Flush();
+            WinSerial.Write(port, message);
         }
         catch (Exception e)
         {
@@ -162,9 +141,9 @@ public class SerialManager : MonoBehaviour
         {
             try
             {
-                if (port != null && port.IsOpen)
+                if (port != IntPtr.Zero)
                 {
-                    int bytes = port.Read(buffer, 0, buffer.Length);
+                    int bytes = WinSerial.Read(port, buffer);
                     if (bytes > 0)
                     {
                         string received = System.Text.Encoding.ASCII.GetString(buffer, 0, bytes);
@@ -228,7 +207,6 @@ public class SerialManager : MonoBehaviour
                     }
                 }
             }
-            catch (TimeoutException) { }
             catch (Exception e)
             {
                 Debug.LogError("[Serial] Read error");
@@ -241,22 +219,19 @@ public class SerialManager : MonoBehaviour
     public void StopSerialThreadAndPort()
     {
         running = false;
+        IntPtr open = port;
+        port = IntPtr.Zero;
 
         try
         {
-            if (readThread != null && readThread.IsAlive)
-                readThread.Join(500);
+            WinSerial.Close(open);
         }
         catch { }
 
         try
         {
-            if (port != null)
-            {
-                if (port.IsOpen)
-                    port.Close();
-                port.Dispose();
-            }
+            if (readThread != null && readThread.IsAlive)
+                readThread.Join(700);
         }
         catch { }
     }

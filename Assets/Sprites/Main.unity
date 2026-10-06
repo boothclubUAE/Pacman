@@ -4364,7 +4364,7 @@ GameObject:
   - component: {fileID: 1913338050}
   - component: {fileID: 1913338049}
   m_Layer: 0
-  m_Name: Registration
+  m_Name: GameUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

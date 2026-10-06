@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Timer Settings")]
     [SerializeField] private TMP_Text timerText;
-    [TabField] public int powerUpTimerDuration = 60;
+    [TabField] public float gameTime = 60f;
     private float currentTimerValue;
     private bool isTimerRunning = false;
     private int powerPelletsRemaining = 4;
@@ -44,8 +44,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioClip wakaSound2; // Second "waka" sound (ka)
 
     public int score { get; private set; } = 0;
-    [TabField]
-    int lives = 1;
+    [TabField] public int livesCount = 1;
+    private int lives = 1;
     private int highScore = 0;
 
     private int ghostMultiplier = 1;
@@ -92,16 +92,16 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         SetScore(0);
-        SetLives(lives);
+        SetLives(livesCount);
         IdleState();
     }
 
     internal void OnSTART()
     {
-        if (!isGameStarted && Registration.Instance.waitingForStartButton)
+        if (!isGameStarted && GameUI.Instance.waitingForStartButton)
         {
             StartGame();
-            Registration.Instance?.OnGameStarted();
+            GameUI.Instance?.OnGameStarted();
         }
     }
 
@@ -113,9 +113,11 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        if (Application.isEditor && Input.GetKeyDown(KeyCode.Space))
+            OnSTART();
+
         if (showingGameOver)
             return;
-
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.L))
         {
             ClearHighScore();
@@ -230,7 +232,7 @@ public class GameManager : MonoBehaviour
     {
         isGameStarted = false;
         SetScore(0);
-        SetLives(1);
+        SetLives(livesCount);
         IdleState();
         Round = 0;
     }
@@ -242,7 +244,8 @@ public class GameManager : MonoBehaviour
 
         // Start power-up challenge timer
         powerPelletsRemaining = 4;
-        currentTimerValue = powerUpTimerDuration;
+        RestoreCollectables();
+        currentTimerValue = gameTime;
         isTimerRunning = true;
         UpdateTimerText();
     }
@@ -256,7 +259,7 @@ public class GameManager : MonoBehaviour
         }
         pacman.ResetState();
         pacman.movement.canMove = true;
-        Registration.Instance.waitingForEndButton = true;
+        GameUI.Instance.waitingForEndButton = true;
     }
 
     internal void GameOver(string gameoverText)
@@ -278,7 +281,7 @@ public class GameManager : MonoBehaviour
             SaveHighScore();
             UpdateHighScoreText();
         }
-        Registration.Instance?.OnEnd();
+        GameUI.Instance?.OnEnd();
 
         if (gameOverClip != null)
         {
@@ -467,7 +470,36 @@ public class GameManager : MonoBehaviour
     }
     private void DisablePowerup(int id)
     {
-        Powerups[id].CrossFadeAlpha(0.2f, 0.2f, true);
+        foreach (var icon in CollectableIcons(id))
+        {
+            Color color = icon.color;
+            color.a = 0.25f;
+            icon.color = color;
+        }
+    }
+
+    private void RestoreCollectables()
+    {
+        foreach (var icon in CollectableIcons(-1))
+        {
+            Color color = icon.color;
+            color.a = 1f;
+            icon.color = color;
+        }
+    }
+
+    private IEnumerable<Image> CollectableIcons(int siblingIndex)
+    {
+        Image[] images = FindObjectsByType<Image>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < images.Length; i++)
+        {
+            Transform parent = images[i].transform.parent;
+            if (parent == null || parent.name != "Collectables")
+                continue;
+            if (siblingIndex >= 0 && images[i].transform.GetSiblingIndex() != siblingIndex)
+                continue;
+            yield return images[i];
+        }
     }
 
     private bool HasRemainingPellets()
